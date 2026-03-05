@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>脱口秀专场导览</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f11;
+      --card-bg: #1a1a1f;
+      --accent: #ff6b35;
+      --text: #e8e8e8;
+      --text-muted: #888;
+      --border: #2a2a35;
+      --modal-bg: #16161c;
+      --session-bg: #1e1e26;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 32px 40px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-muted); margin-top: 6px; font-size: 14px; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      padding: 20px 40px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 180px;
+      max-width: 320px;
+      padding: 9px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .filter-btn {
+      padding: 8px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-add {
+      margin-left: auto;
+      padding: 9px 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-add:hover { opacity: 0.85; }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 0 40px 48px;
+    }
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, 1fr); padding: 0 20px 40px; }
+      .toolbar, header, .city-bar { padding-left: 20px; padding-right: 20px; }
+    }
+    @media (max-width: 560px) {
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 28px rgba(255, 107, 53, 0.18);
+    }
+    .card-cover {
+      aspect-ratio: 3 / 4;
+      position: relative;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+    }
+    .card-cover-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.25);
+      font-size: 13px;
+    }
+    .card-cover-placeholder span {
+      font-size: 40px;
+      opacity: 0.3;
+    }
+    .card-performer {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .session-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--accent);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+    .card-body { padding: 14px 16px 16px; }
+    .card-title {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    .city-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 11px; }
+    .city-tag {
+      background: #252530;
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+    .next-show {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Modal base ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: var(--modal-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 88vh;
+      overflow-y: auto;
+      position: relative;
+      animation: popIn 0.18s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.96); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .modal-header {
+      padding: 26px 26px 18px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--modal-bg);
+      z-index: 1;
+    }
+    .modal-header h2 { font-size: 20px; font-weight: 700; }
+    .modal-header .sub { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--border);
+      border: none;
+      color: var(--text-muted);
+      font-size: 17px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .close-btn:hover { background: var(--accent); color: white; }
+    .modal-body { padding: 20px 26px 26px; }
+
+    /* ── Session list in detail modal ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+    .session-item {
+      background: var(--session-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+    }
+    .session-item:hover { border-color: #3a3a50; }
+    .session-city {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge-sm {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .badge-ticketing { background: rgba(255,107,53,0.15); color: var(--accent); }
+    .badge-past      { background: #252530; color: #555; }
+    .badge-ugc       { background: rgba(76,175,80,0.15); color: #4caf50; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .info-item label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .info-item span { font-size: 13px; }
+    .ticket-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.15s;
+    }
+    .ticket-btn:hover { opacity: 0.85; }
+    .no-link { font-size: 12px; color: #555; margin-top: 2px; }
+
+    /* ── UGC Form ── */
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--session-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group select:focus { border-color: var(--accent); }
+    .form-group select option { background: var(--session-bg); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-link {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 8px 16px;
+      transition: all 0.15s;
+    }
+    .btn-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── City bar ── */
+    .city-bar {
+      padding: 0 40px 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 900px) { .city-bar { padding-left: 20px; padding-right: 20px; } }
+    .city-btn {
+      padding: 5px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .city-btn:hover, .city-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(255,107,53,0.08);
+    }
+
+    /* ── Empty state ── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 64px 20px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #2a3a2a;
+      color: #4caf50;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.25s;
+      z-index: 999;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>脱口秀<span>专场</span>导览</h1>
+  <p>全国巡演场次信息，点击专场查看详情与购票</p>
+</header>
+
+<div class="toolbar">
+  <input class="search-input" type="text" id="searchInput" placeholder="搜索专场或演员..." oninput="render()">
+  <button class="filter-btn active" onclick="setFilter('all', this)">全部</button>
+  <button class="filter-btn" onclick="setFilter('upcoming', this)">即将演出</button>
+  <button class="filter-btn" onclick="setFilter('ticketing', this)">抢票中</button>
+  <button class="btn-add" onclick="openUGC()">+ 补充场次</button>
+</div>
+
+<div class="city-bar" id="cityBar"></div>
+
+<div class="grid" id="grid"></div>
+
+<!-- ── Detail Modal ── -->
+<div class="overlay" id="detailOverlay" onclick="onOverlayClick(event,'detailOverlay')">
+  <div class="modal" id="detailModal">
+    <div class="modal-header">
+      <h2 id="d-title"></h2>
+      <p class="sub" id="d-sub"></p>
+      <button class="close-btn" onclick="closeDetail()">&#215;</button>
+    </div>
+    <div class="modal-body" id="d-body"></div>
+  </div>
+</div>
+
+<!-- ── UGC Modal ── -->
+<div class="overlay" id="ugcOverlay" onclick="onOverlayClick(event,'ugcOverlay')">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>补充场次信息</h2>
+      <p class="sub">帮助更多人找到演出</p>
+      <button class="close-btn" onclick="closeOverlay('ugcOverlay')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>选择专场</label>
+        <select id="u-show"></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>城市</label>
+          <input id="u-city" type="text" placeholder="如：成都">
+        </div>
+        <div class="form-group">
+          <label>场馆</label>
+          <input id="u-venue" type="text" placeholder="如：锦城艺术宫">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>演出时间</label>
+          <input id="u-showtime" type="datetime-local">
+        </div>
+        <div class="form-group">
+          <label>开售时间（选填）</label>
+          <input id="u-tickettime" type="datetime-local">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>购票链接（选填）</label>
+        <input id="u-link" type="url" placeholder="https://...">
+      </div>
+      <button class="btn-primary" onclick="submitUGC()">提交场次</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+// 数据（手动录入，可持续通过UGC补充）
+// ─────────────────────────────────────────
+const shows = [
+  {
+    id: 1,
+    name: '《发现丑的眼睛2.0》',
+    performer: '鑫博',
+    image: 'https://img.alicdn.com/bao/uploaded/i1/2251059038/O1CN01gjOx4L2GdSldSL5El_!!4611686018427383646-0-item_pic.jpg_q60.jpg_.webp',
+    cover: 'linear-gradient(135deg, #3d1a2a, #1a1a3d)',
+    sessions: [
+      { id:'s1', city:'北京', venue:'工人体育馆', showTime:'2026-03-20 20:00', ticketSaleTime:'2026-03-08 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s2', city:'上海', venue:'梅赛德斯奔驰文化中心', showTime:'2026-04-05 20:00', ticketSaleTime:'2026-03-15 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s3', city:'广州', venue:'广州大剧院', showTime:'2026-04-18 20:00', ticketSaleTime:'2026-03-25 10:00', ticketLink:'', source:'official' },
+    ]
+  },
+  {
+    id: 2,
+    name: '《糖》',
+    performer: '唐香玉',
+    image: 'https://sns-webpic-qc.xhscdn.com/202603052049/351e5c18b9fb6b7ce79d52e71ac5f98d/notes_pre_post/1040g3k031rd4nen30a1g5nl7pob08crehn0svhg!nd_dft_wlteh_webp_3',
+    cover: 'linear-gradient(135deg, #1a3d2a, #2a3d1a)',
+    sessions: [
+      { id:'s4', city:'成都', venue:'城市音乐厅', showTime:'2026-03-28 19:30', ticketSaleTime:'2026-03-10 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
+      { id:'s5', city:'杭州', venue:'杭州大剧院', showTime:'2026-04-10 20:00', ticketSaleTime:'2026-03-20 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
+    ]
+  },
+  {
+    id: 3,
+    name: '《有出息》',
+    performer: '门腔',
+    image: 'https://sns-webpic-qc.xhscdn.com/202603052056/1a180ae4afbf8bc99e3e03263d4a91f0/notes_pre_post/1040g3k831rbtshtcnu10400qpfsptki70fdgukg!nd_dft_wlteh_webp_3',
+    cover: 'linear-gradient(135deg, #3d2a1a, #2a1a3d)',
+    sessions: [
+      { id:'s6', city:'深圳', venue:'深圳保利剧院', showTime:'2026-03-22 20:00', ticketSaleTime:'2026-03-06 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s7', city:'武汉', venue:'武汉天河剧院', showTime:'2026-04-01 20:00', ticketSaleTime:'2026-03-12 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s8', city:'西安', venue:'西安音乐厅', showTime:'2026-04-15 20:00', ticketSaleTime:'2026-03-22 10:00', ticketLink:'', source:'official' },
+    ]
+  },
+  {
+    id: 4,
+    name: '《小刘的奇妙冒险》',
+    performer: '刘仁铖',
+    image: 'https://sns-webpic-qc.xhscdn.com/202603052057/c5d83165f148c118c947d2d4c7d7e61a/notes_pre_post/1040g3k031sdg55pf621g400qpfsptki7jailrko!nd_dft_wlteh_webp_3',
+    cover: 'linear-gradient(135deg, #1a2a3d, #3d1a3d)',
+    sessions: [
+      { id:'s9', city:'北京', venue:'朝阳剧场', showTime:'2026-03-15 20:00', ticketSaleTime:'2026-03-05 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
+    ]
+  },
+  {
+    id: 5,
+    name: '《干吧！辣茶！》',
+    performer: '辣茶',
+    image: 'https://ci.xiaohongshu.com/1040g00831sfpeodkle6g5omnd8tgg125duuqpb8',
+    cover: 'linear-gradient(135deg, #2a3d3d, #1a3d2a)',
+    sessions: [
+      { id:'s10', city:'上海', venue:'兰心大戏院', showTime:'2026-03-18 20:00', ticketSaleTime:'2026-03-07 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s11', city:'南京', venue:'南京保利大剧院', showTime:'2026-04-03 20:00', ticketSaleTime:'2026-03-14 10:00', ticketLink:'', source:'official' },
+    ]
+  },
+  {
+    id: 6,
+    name: '《杨笠脱口秀专场》',
+    performer: '杨笠',
+    image: 'https://ci.xiaohongshu.com/1040g00831jjcmtjl30004a118mehok3kc2p3tro',
+    cover: 'linear-gradient(135deg, #3d3d1a, #3d1a1a)',
+    sessions: [
+      { id:'s12', city:'北京', venue:'保利剧院', showTime:'2026-03-25 20:00', ticketSaleTime:'2026-03-09 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s13', city:'成都', venue:'锦城艺术宫', showTime:'2026-04-08 20:00', ticketSaleTime:'2026-03-18 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s14', city:'重庆', venue:'施光南大剧院', showTime:'2026-04-20 20:00', ticketSaleTime:'2026-03-28 10:00', ticketLink:'', source:'official' },
+    ]
+  },
+];
+
+// ─────────────────────────────────────────
+// 工具函数
+// ─────────────────────────────────────────
+const now = new Date();
+
+function fmt(str) {
+  if (!str) return '待公布';
+  const d = new Date(str);
+  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+       + ' ' + d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function isPast(s)      { return new Date(s.showTime) <= now; }
+function isUpcoming(s)  { return new Date(s.showTime) > now; }
+function isTicketing(s) {
+  const sale = new Date(s.ticketSaleTime);
+  return s.ticketSaleTime && sale <= now && isUpcoming(s);
+}
+
+function nextSession(show) {
+  return show.sessions
+    .filter(isUpcoming)
+    .sort((a,b) => new Date(a.showTime) - new Date(b.showTime))[0] || null;
+}
+
+// ─────────────────────────────────────────
+// 渲染卡片
+// ─────────────────────────────────────────
+let currentFilter = 'all';
+let currentCity   = 'all';
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setCity(city) {
+  currentCity = city;
+  buildCityBar();
+  render();
+}
+
+function buildCityBar() {
+  const cities = [...new Set(shows.flatMap(s => s.sessions.map(ss => ss.city)))].sort();
+  document.getElementById('cityBar').innerHTML =
+    ['all', ...cities].map(c =>
+      `<button class="city-btn${c === currentCity ? ' active' : ''}" onclick="setCity('${c}')">
+        ${c === 'all' ? '全部城市' : c}
+      </button>`
+    ).join('');
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const grid = document.getElementById('grid');
+
+  let list = shows.filter(show => {
+    const matchQ = !q
+      || show.name.toLowerCase().includes(q)
+      || show.performer.toLowerCase().includes(q)
+      || show.sessions.some(s => s.city.includes(q) || s.venue.toLowerCase().includes(q));
+    if (!matchQ) return false;
+    if (currentCity !== 'all' && !show.sessions.some(s => s.city === currentCity)) return false;
+    if (currentFilter === 'upcoming')  return show.sessions.some(isUpcoming);
+    if (currentFilter === 'ticketing') return show.sessions.some(isTicketing);
+    return true;
+  });
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty">没有找到相关专场</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(show => {
+    const cities       = [...new Set(show.sessions.map(s => s.city))];
+    const upcomingCnt  = show.sessions.filter(isUpcoming).length;
+    const next         = nextSession(show);
+    const hasTicketing = show.sessions.some(isTicketing);
+
+    const dotColor = !next ? '#444' : hasTicketing ? 'var(--accent)' : '#4caf50';
+    const nextTxt  = !next
+      ? '<span style="color:#444">暂无即将演出</span>'
+      : (hasTicketing ? '<span style="color:var(--accent)">抢票中 · </span>' : '') + fmt(next.showTime);
+
+    return `
+      <div class="card" onclick="openDetail(${show.id})">
+        <div class="card-cover" style="${show.image ? `background-image:url('${show.image}')` : `background:${show.cover}`}">
+          ${show.image ? '' : `<div class="card-cover-placeholder"><span>🎭</span>暂无封面</div>`}
+          ${upcomingCnt ? `<span class="session-badge">${upcomingCnt} 场</span>` : ''}
+        </div>
+        <div class="card-body">
+          <div class="card-title">${show.name}</div>
+          <div class="card-performer">${show.performer}</div>
+          <div class="city-tags">${cities.map(c => `<span class="city-tag">${c}</span>`).join('')}</div>
+          <div class="next-show">
+            <span class="dot" style="background:${dotColor}"></span>
+            <span>${nextTxt}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────
+// 详情弹窗
+// ─────────────────────────────────────────
+function openDetail(id) {
+  const show = shows.find(s => s.id === id);
+  if (!show) return;
+
+  document.getElementById('d-title').textContent = show.name;
+  document.getElementById('d-sub').textContent   = show.performer + ' · ' + show.sessions.length + ' 个场次';
+
+  const sorted = [...show.sessions].sort((a,b) => new Date(a.showTime) - new Date(b.showTime));
+
+  document.getElementById('d-body').innerHTML = `
+    <div class="section-label" style="margin-bottom:14px">全部场次</div>
+    ${sorted.map(s => {
+      const past      = isPast(s);
+      const ticketing = isTicketing(s);
+      return `
+        <div class="session-item" style="${past ? 'opacity:.45' : ''}">
+          <div class="session-city">
+            <span>📍 ${s.city}</span>
+            ${ticketing ? '<span class="badge-sm badge-ticketing">抢票中</span>' : ''}
+            ${past      ? '<span class="badge-sm badge-past">已结束</span>'      : ''}
+            ${s.source === 'ugc' ? '<span class="badge-sm badge-ugc">用户补充</span>' : ''}
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>场馆</label>
+              <span>${s.venue}</span>
+            </div>
+            <div class="info-item">
+              <label>演出时间</label>
+              <span>${fmt(s.showTime)}</span>
+            </div>
+            <div class="info-item">
+              <label>开售时间</label>
+              <span>${fmt(s.ticketSaleTime)}</span>
+            </div>
+          </div>
+          ${s.ticketLink
+            ? `<a class="ticket-btn" href="${s.ticketLink}" target="_blank" rel="noopener">🎟 立即购票</a>`
+            : `<p class="no-link">购票链接待补充</p>`}
+        </div>`;
+    }).join('')}
+    <div style="margin-top:18px; text-align:center">
+      <button class="btn-link" onclick="openUGCForShow(${show.id})">+ 补充此专场场次</button>
+    </div>
+  `;
+
+  document.getElementById('detailOverlay').classList.add('show');
+}
+
+function closeDetail() {
+  closeOverlay('detailOverlay');
+}
+
+// ─────────────────────────────────────────
+// UGC 弹窗
+// ─────────────────────────────────────────
+function fillShowSelect(selectedId) {
+  document.getElementById('u-show').innerHTML =
+    shows.map(s => `<option value="${s.id}"${s.id === selectedId ? ' selected' : ''}>${s.name}</option>`).join('');
+}
+
+function openUGC() {
+  fillShowSelect();
+  document.getElementById('ugcOverlay').classList.add('show');
+}
+
+function openUGCForShow(id) {
+  closeDetail();
+  fillShowSelect(id);
+  setTimeout(() => document.getElementById('ugcOverlay').classList.add('show'), 50);
+}
+
+function submitUGC() {
+  const showId   = parseInt(document.getElementById('u-show').value);
+  const city     = document.getElementById('u-city').value.trim();
+  const venue    = document.getElementById('u-venue').value.trim();
+  const showTime = document.getElementById('u-showtime').value;
+  const tickTime = document.getElementById('u-tickettime').value;
+  const link     = document.getElementById('u-link').value.trim();
+
+  if (!city || !venue || !showTime) {
+    alert('请填写城市、场馆和演出时间');
+    return;
+  }
+
+  const show = shows.find(s => s.id === showId);
+  show.sessions.push({
+    id: 'ugc_' + Date.now(),
+    city, venue,
+    showTime:       showTime.replace('T', ' '),
+    ticketSaleTime: tickTime ? tickTime.replace('T', ' ') : '',
+    ticketLink:     link,
+    source:         'ugc'
+  });
+
+  // 清空表单
+  ['u-city','u-venue','u-showtime','u-tickettime','u-link'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  closeOverlay('ugcOverlay');
+  buildCityBar();
+  render();
+  showToast('场次已补充，感谢贡献！');
+
+  // 重新打开详情
+  setTimeout(() => openDetail(showId), 300);
+}
+
+// ─────────────────────────────────────────
+// 工具
+// ─────────────────────────────────────────
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function onOverlayClick(e, id) {
+  if (e.target === document.getElementById(id)) closeOverlay(id);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─────────────────────────────────────────
+// 初始化
+// ─────────────────────────────────────────
+render();
+buildCityBar();
+fillShowSelect();
+</script>
+</body>
+</html>
