@@ -1478,11 +1478,17 @@ function clipText(ctx, text, maxWidth) {
 
 function downloadCanvas(canvas, filename) {
   canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('海报已生成，请查看下载文件');
+    const file = new File([blob], filename, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: '脱口秀专场海报' })
+        .catch(() => {});
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('海报已生成，请查看下载文件');
+    }
   });
 }
 
