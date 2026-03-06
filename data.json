@@ -1,16 +1,1 @@
-  [
-    {
-      "id": 1,
-      "name": "《发现丑的眼睛2.0》",
-      "performer": "鑫博",
-      "image": "images/faxianchoudeyanjing2.jpg",
-      "sessions": [
-        { "id": "s1_1", "city": "北京", "venue": "工人体育馆", "price": "¥199-599", "showTime":
-  "2026-03-20 20:00", "ticketSaleTime": "2026-03-08 10:00", "ticketLink": "https://www.damai.cn",
-  "source": "official" },
-        { "id": "s1_2", "city": "上海", "venue": "梅赛德斯奔驰文化中心", "price": "¥199-599",
-  "showTime": "2026-04-05 20:00", "ticketSaleTime": "2026-03-15 10:00", "ticketLink":
-  "https://www.damai.cn", "source": "official" }
-      ]
-    }
-  ]
+[]
