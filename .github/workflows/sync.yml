@@ -1,5 +1,5 @@
-  name: Sync Google Sheets                                                                           
-                                                            
+  name: Sync Google Sheets
+
   on:
     schedule:
       - cron: '0 1 * * *'
