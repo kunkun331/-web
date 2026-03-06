@@ -140,7 +140,13 @@
     .card-performer {
       font-size: 12px;
       color: var(--text-muted);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+    .card-price {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
     }
     .session-badge {
       position: absolute;
@@ -390,6 +396,71 @@
       font-size: 15px;
     }
 
+    /* ── UGC Tabs ── */
+    .ugc-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+      background: var(--session-bg);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .ugc-tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 7px;
+      background: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .ugc-tab.active {
+      background: var(--card-bg);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── Admin panel ── */
+    .admin-item {
+      background: var(--session-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .admin-item-title { font-weight: 600; font-size: 14px; }
+    .admin-item-meta  { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .admin-actions    { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-approve {
+      padding: 7px 16px;
+      background: rgba(76,175,80,0.12);
+      border: 1px solid #4caf50;
+      border-radius: 8px;
+      color: #4caf50;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-reject {
+      padding: 7px 16px;
+      background: rgba(255,107,53,0.1);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      color: var(--accent);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .admin-empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
     /* ── Toast ── */
     .toast {
       position: fixed;
@@ -416,7 +487,7 @@
 <body>
 
 <header>
-  <h1>脱口秀<span>专场</span>导览</h1>
+  <h1 onclick="onTitleClick()" style="cursor:default">脱口秀<span>专场</span>导览</h1>
   <p>全国巡演场次信息，点击专场查看详情与购票</p>
 </header>
 
@@ -448,15 +519,43 @@
 <div class="overlay" id="ugcOverlay" onclick="onOverlayClick(event,'ugcOverlay')">
   <div class="modal">
     <div class="modal-header">
-      <h2>补充场次信息</h2>
-      <p class="sub">帮助更多人找到演出</p>
+      <h2>贡献演出信息</h2>
+      <p class="sub">提交后由管理员审核后发布</p>
       <button class="close-btn" onclick="closeOverlay('ugcOverlay')">&#215;</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>选择专场</label>
-        <select id="u-show"></select>
+      <div class="ugc-tabs">
+        <button class="ugc-tab active" onclick="setUGCType('session',this)">补充已有演出场次</button>
+        <button class="ugc-tab" onclick="setUGCType('show',this)">新增演出</button>
       </div>
+
+      <!-- 补充场次：选演出 -->
+      <div id="ugc-session-form">
+        <div class="form-group">
+          <label>选择演出</label>
+          <select id="u-show"></select>
+        </div>
+      </div>
+
+      <!-- 新增演出：填演出信息 -->
+      <div id="ugc-show-form" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label>演出名称</label>
+            <input id="u-name" type="text" placeholder="如：《xxx》专场">
+          </div>
+          <div class="form-group">
+            <label>演员</label>
+            <input id="u-performer" type="text" placeholder="如：李诞">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>封面图链接（选填）</label>
+          <input id="u-image" type="url" placeholder="https://...">
+        </div>
+      </div>
+
+      <!-- 公共场次字段 -->
       <div class="form-row">
         <div class="form-group">
           <label>城市</label>
@@ -477,12 +576,30 @@
           <input id="u-tickettime" type="datetime-local">
         </div>
       </div>
-      <div class="form-group">
-        <label>购票链接（选填）</label>
-        <input id="u-link" type="url" placeholder="https://...">
+      <div class="form-row">
+        <div class="form-group">
+          <label>票价（选填）</label>
+          <input id="u-price" type="text" placeholder="如：¥99-299">
+        </div>
+        <div class="form-group">
+          <label>购票链接（选填）</label>
+          <input id="u-link" type="url" placeholder="https://...">
+        </div>
       </div>
-      <button class="btn-primary" onclick="submitUGC()">提交场次</button>
+      <button class="btn-primary" onclick="submitUGC()">提交审核</button>
     </div>
+  </div>
+</div>
+
+<!-- ── Admin Modal ── -->
+<div class="overlay" id="adminOverlay" onclick="onOverlayClick(event,'adminOverlay')">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <h2>管理员审核</h2>
+      <p class="sub" id="admin-sub"></p>
+      <button class="close-btn" onclick="closeOverlay('adminOverlay')">&#215;</button>
+    </div>
+    <div class="modal-body" id="admin-body"></div>
   </div>
 </div>
 
@@ -500,9 +617,9 @@ const shows = [
     image: 'images/faxianchoudeyanjing2.jpg',
     cover: 'linear-gradient(135deg, #3d1a2a, #1a1a3d)',
     sessions: [
-      { id:'s1', city:'北京', venue:'工人体育馆', showTime:'2026-03-20 20:00', ticketSaleTime:'2026-03-08 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s2', city:'上海', venue:'梅赛德斯奔驰文化中心', showTime:'2026-04-05 20:00', ticketSaleTime:'2026-03-15 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s3', city:'广州', venue:'广州大剧院', showTime:'2026-04-18 20:00', ticketSaleTime:'2026-03-25 10:00', ticketLink:'', source:'official' },
+      { id:'s1', city:'北京', venue:'工人体育馆', price:'¥199-599', showTime:'2026-03-20 20:00', ticketSaleTime:'2026-03-08 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s2', city:'上海', venue:'梅赛德斯奔驰文化中心', price:'¥199-599', showTime:'2026-04-05 20:00', ticketSaleTime:'2026-03-15 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s3', city:'广州', venue:'广州大剧院', price:'¥179-499', showTime:'2026-04-18 20:00', ticketSaleTime:'2026-03-25 10:00', ticketLink:'', source:'official' },
     ]
   },
   {
@@ -512,8 +629,8 @@ const shows = [
     image: 'images/tag.jpg',
     cover: 'linear-gradient(135deg, #1a3d2a, #2a3d1a)',
     sessions: [
-      { id:'s4', city:'成都', venue:'城市音乐厅', showTime:'2026-03-28 19:30', ticketSaleTime:'2026-03-10 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
-      { id:'s5', city:'杭州', venue:'杭州大剧院', showTime:'2026-04-10 20:00', ticketSaleTime:'2026-03-20 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
+      { id:'s4', city:'成都', venue:'城市音乐厅', price:'¥99-299', showTime:'2026-03-28 19:30', ticketSaleTime:'2026-03-10 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
+      { id:'s5', city:'杭州', venue:'杭州大剧院', price:'¥99-299', showTime:'2026-04-10 20:00', ticketSaleTime:'2026-03-20 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
     ]
   },
   {
@@ -523,9 +640,9 @@ const shows = [
     image: 'images/youchuxi.jpg',
     cover: 'linear-gradient(135deg, #3d2a1a, #2a1a3d)',
     sessions: [
-      { id:'s6', city:'深圳', venue:'深圳保利剧院', showTime:'2026-03-22 20:00', ticketSaleTime:'2026-03-06 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s7', city:'武汉', venue:'武汉天河剧院', showTime:'2026-04-01 20:00', ticketSaleTime:'2026-03-12 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s8', city:'西安', venue:'西安音乐厅', showTime:'2026-04-15 20:00', ticketSaleTime:'2026-03-22 10:00', ticketLink:'', source:'official' },
+      { id:'s6', city:'深圳', venue:'深圳保利剧院', price:'¥129-359', showTime:'2026-03-22 20:00', ticketSaleTime:'2026-03-06 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s7', city:'武汉', venue:'武汉天河剧院', price:'¥129-359', showTime:'2026-04-01 20:00', ticketSaleTime:'2026-03-12 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s8', city:'西安', venue:'西安音乐厅', price:'¥129-359', showTime:'2026-04-15 20:00', ticketSaleTime:'2026-03-22 10:00', ticketLink:'', source:'official' },
     ]
   },
   {
@@ -535,7 +652,7 @@ const shows = [
     image: 'images/xiaoliudeqimiaomaoxian.jpg',
     cover: 'linear-gradient(135deg, #1a2a3d, #3d1a3d)',
     sessions: [
-      { id:'s9', city:'北京', venue:'朝阳剧场', showTime:'2026-03-15 20:00', ticketSaleTime:'2026-03-05 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
+      { id:'s9', city:'北京', venue:'朝阳剧场', price:'¥99-259', showTime:'2026-03-15 20:00', ticketSaleTime:'2026-03-05 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
     ]
   },
   {
@@ -545,8 +662,8 @@ const shows = [
     image: 'images/ganbalacha.jpg',
     cover: 'linear-gradient(135deg, #2a3d3d, #1a3d2a)',
     sessions: [
-      { id:'s10', city:'上海', venue:'兰心大戏院', showTime:'2026-03-18 20:00', ticketSaleTime:'2026-03-07 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s11', city:'南京', venue:'南京保利大剧院', showTime:'2026-04-03 20:00', ticketSaleTime:'2026-03-14 10:00', ticketLink:'', source:'official' },
+      { id:'s10', city:'上海', venue:'兰心大戏院', price:'¥119-319', showTime:'2026-03-18 20:00', ticketSaleTime:'2026-03-07 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s11', city:'南京', venue:'南京保利大剧院', price:'¥119-319', showTime:'2026-04-03 20:00', ticketSaleTime:'2026-03-14 10:00', ticketLink:'', source:'official' },
     ]
   },
   {
@@ -556,9 +673,9 @@ const shows = [
     image: 'images/yanglituokouxiuzhuanchang.jpg',
     cover: 'linear-gradient(135deg, #3d3d1a, #3d1a1a)',
     sessions: [
-      { id:'s12', city:'北京', venue:'保利剧院', showTime:'2026-03-25 20:00', ticketSaleTime:'2026-03-09 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s13', city:'成都', venue:'锦城艺术宫', showTime:'2026-04-08 20:00', ticketSaleTime:'2026-03-18 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s14', city:'重庆', venue:'施光南大剧院', showTime:'2026-04-20 20:00', ticketSaleTime:'2026-03-28 10:00', ticketLink:'', source:'official' },
+      { id:'s12', city:'北京', venue:'保利剧院', price:'¥159-459', showTime:'2026-03-25 20:00', ticketSaleTime:'2026-03-09 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s13', city:'成都', venue:'锦城艺术宫', price:'¥159-459', showTime:'2026-04-08 20:00', ticketSaleTime:'2026-03-18 10:00', ticketLink:'https://www.damai.cn', source:'official' },
+      { id:'s14', city:'重庆', venue:'施光南大剧院', price:'¥159-459', showTime:'2026-04-20 20:00', ticketSaleTime:'2026-03-28 10:00', ticketLink:'', source:'official' },
     ]
   },
 ];
@@ -643,6 +760,8 @@ function render() {
     const upcomingCnt  = show.sessions.filter(isUpcoming).length;
     const next         = nextSession(show);
     const hasTicketing = show.sessions.some(isTicketing);
+    const prices       = show.sessions.map(s => s.price).filter(Boolean);
+    const minPrice     = prices.length ? prices[0] : '';
 
     const dotColor = !next ? '#444' : hasTicketing ? 'var(--accent)' : '#4caf50';
     const nextTxt  = !next
@@ -658,6 +777,7 @@ function render() {
         <div class="card-body">
           <div class="card-title">${show.name}</div>
           <div class="card-performer">${show.performer}</div>
+          ${minPrice ? `<div class="card-price">${minPrice}</div>` : ''}
           <div class="city-tags">${cities.map(c => `<span class="city-tag">${c}</span>`).join('')}</div>
           <div class="next-show">
             <span class="dot" style="background:${dotColor}"></span>
@@ -697,6 +817,10 @@ function openDetail(id) {
             <div class="info-item">
               <label>场馆</label>
               <span>${s.venue}</span>
+            </div>
+            <div class="info-item">
+              <label>票价</label>
+              <span style="color:var(--accent);font-weight:600">${s.price || '待公布'}</span>
             </div>
             <div class="info-item">
               <label>演出时间</label>
@@ -743,41 +867,179 @@ function openUGCForShow(id) {
   setTimeout(() => document.getElementById('ugcOverlay').classList.add('show'), 50);
 }
 
+// ─────────────────────────────────────────
+// UGC 提交 & 审核
+// ─────────────────────────────────────────
+const ADMIN_PASSWORD = 'talkshow2026'; // 可自行修改
+let ugcType = 'session';
+let titleClickCount = 0;
+let titleClickTimer  = null;
+
+function setUGCType(type, btn) {
+  ugcType = type;
+  document.querySelectorAll('.ugc-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ugc-session-form').style.display = type === 'session' ? '' : 'none';
+  document.getElementById('ugc-show-form').style.display    = type === 'show'    ? '' : 'none';
+}
+
 function submitUGC() {
-  const showId   = parseInt(document.getElementById('u-show').value);
   const city     = document.getElementById('u-city').value.trim();
   const venue    = document.getElementById('u-venue').value.trim();
   const showTime = document.getElementById('u-showtime').value;
   const tickTime = document.getElementById('u-tickettime').value;
+  const price    = document.getElementById('u-price').value.trim();
   const link     = document.getElementById('u-link').value.trim();
 
-  if (!city || !venue || !showTime) {
-    alert('请填写城市、场馆和演出时间');
-    return;
+  if (!city || !venue || !showTime) { alert('请填写城市、场馆和演出时间'); return; }
+
+  const pending = getPending();
+
+  if (ugcType === 'session') {
+    const showId = parseInt(document.getElementById('u-show').value);
+    pending.push({
+      id: 'p_' + Date.now(), type: 'session',
+      showId, city, venue, price,
+      showTime: showTime.replace('T', ' '),
+      ticketSaleTime: tickTime ? tickTime.replace('T', ' ') : '',
+      ticketLink: link,
+      submittedAt: new Date().toLocaleString('zh-CN'), status: 'pending'
+    });
+  } else {
+    const name      = document.getElementById('u-name').value.trim();
+    const performer = document.getElementById('u-performer').value.trim();
+    const image     = document.getElementById('u-image').value.trim();
+    if (!name || !performer) { alert('请填写演出名称和演员'); return; }
+    pending.push({
+      id: 'p_' + Date.now(), type: 'show',
+      name, performer, image, city, venue, price,
+      showTime: showTime.replace('T', ' '),
+      ticketSaleTime: tickTime ? tickTime.replace('T', ' ') : '',
+      ticketLink: link,
+      submittedAt: new Date().toLocaleString('zh-CN'), status: 'pending'
+    });
   }
 
-  const show = shows.find(s => s.id === showId);
-  show.sessions.push({
-    id: 'ugc_' + Date.now(),
-    city, venue,
-    showTime:       showTime.replace('T', ' '),
-    ticketSaleTime: tickTime ? tickTime.replace('T', ' ') : '',
-    ticketLink:     link,
-    source:         'ugc'
-  });
-
-  // 清空表单
-  ['u-city','u-venue','u-showtime','u-tickettime','u-link'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-
+  savePending(pending);
+  ['u-city','u-venue','u-showtime','u-tickettime','u-price','u-link','u-name','u-performer','u-image']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   closeOverlay('ugcOverlay');
-  buildCityBar();
-  render();
-  showToast('场次已补充，感谢贡献！');
+  showToast('已提交！审核通过后将显示在页面上，感谢贡献');
+}
 
-  // 重新打开详情
-  setTimeout(() => openDetail(showId), 300);
+// ── localStorage ──
+function getPending() {
+  try { return JSON.parse(localStorage.getItem('ts_pending') || '[]'); } catch { return []; }
+}
+function savePending(data) { localStorage.setItem('ts_pending', JSON.stringify(data)); }
+
+// 页面加载时把已审核通过的内容合并进 shows
+function loadApproved() {
+  getPending().filter(p => p.status === 'approved').forEach(item => {
+    if (item.type === 'session') {
+      const show = shows.find(s => s.id === item.showId);
+      if (show && !show.sessions.find(s => s.id === item.id)) {
+        show.sessions.push({
+          id: item.id, city: item.city, venue: item.venue, price: item.price,
+          showTime: item.showTime, ticketSaleTime: item.ticketSaleTime,
+          ticketLink: item.ticketLink, source: 'ugc'
+        });
+      }
+    } else if (item.type === 'show') {
+      if (!shows.find(s => s.id === item.id)) {
+        shows.push({
+          id: item.id, name: item.name, performer: item.performer,
+          image: item.image || '', cover: 'linear-gradient(135deg, #2a2a3d, #1a2a2a)',
+          sessions: [{
+            id: item.id + '_s1', city: item.city, venue: item.venue, price: item.price,
+            showTime: item.showTime, ticketSaleTime: item.ticketSaleTime,
+            ticketLink: item.ticketLink, source: 'ugc'
+          }]
+        });
+      }
+    }
+  });
+}
+
+// ── 管理员入口：标题连点5次 ──
+function onTitleClick() {
+  titleClickCount++;
+  clearTimeout(titleClickTimer);
+  titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 2000);
+  if (titleClickCount >= 5) {
+    titleClickCount = 0;
+    const pwd = prompt('请输入管理员密码');
+    if (pwd === ADMIN_PASSWORD) { openAdmin(); }
+    else if (pwd !== null) { alert('密码错误'); }
+  }
+}
+
+function openAdmin() {
+  renderAdmin();
+  document.getElementById('adminOverlay').classList.add('show');
+}
+
+function renderAdmin() {
+  const pending = getPending().filter(p => p.status === 'pending');
+  document.getElementById('admin-sub').textContent = `待审核 ${pending.length} 条`;
+  const body = document.getElementById('admin-body');
+  if (!pending.length) {
+    body.innerHTML = '<div class="admin-empty">暂无待审核内容</div>';
+    return;
+  }
+  body.innerHTML = pending.map(item => {
+    const showName  = item.type === 'session'
+      ? (shows.find(s => s.id === item.showId)?.name || '未知演出')
+      : item.name;
+    const typeLabel = item.type === 'session' ? '补充场次' : '新增演出';
+    return `
+      <div class="admin-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div>
+            <div class="admin-item-title">${showName}</div>
+            <div class="admin-item-meta">${typeLabel} · 提交于 ${item.submittedAt}</div>
+          </div>
+          <span class="badge-sm badge-ugc">${typeLabel}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:2">
+          ${item.type === 'show' ? `演员：${item.performer}<br>` : ''}
+          城市：${item.city} · 场馆：${item.venue}<br>
+          演出时间：${item.showTime}<br>
+          ${item.ticketSaleTime ? `开售时间：${item.ticketSaleTime}<br>` : ''}
+          ${item.price ? `票价：${item.price}<br>` : ''}
+          ${item.ticketLink ? `购票链接：<a href="${item.ticketLink}" target="_blank" style="color:var(--accent)">${item.ticketLink}</a>` : ''}
+        </div>
+        <div class="admin-actions">
+          <button class="btn-approve" onclick="approveItem('${item.id}')">通过</button>
+          <button class="btn-reject"  onclick="rejectItem('${item.id}')">拒绝</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function approveItem(id) {
+  const pending = getPending();
+  const item = pending.find(p => p.id === id);
+  if (item) {
+    item.status = 'approved';
+    savePending(pending);
+    loadApproved();
+    buildCityBar();
+    render();
+    renderAdmin();
+    showToast('已通过，内容已显示在页面上');
+  }
+}
+
+function rejectItem(id) {
+  const pending = getPending();
+  const idx = pending.findIndex(p => p.id === id);
+  if (idx !== -1) {
+    pending.splice(idx, 1);
+    savePending(pending);
+    renderAdmin();
+    showToast('已拒绝');
+  }
 }
 
 // ─────────────────────────────────────────
@@ -801,6 +1063,7 @@ function showToast(msg) {
 // ─────────────────────────────────────────
 // 初始化
 // ─────────────────────────────────────────
+loadApproved();
 render();
 buildCityBar();
 fillShowSelect();
