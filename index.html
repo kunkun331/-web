@@ -464,6 +464,32 @@
     .share-actions button:hover { opacity: 0.85; }
     .btn-copy   { background: var(--session-bg); border: 1px solid var(--border); color: var(--text); }
     .btn-poster { background: var(--accent); border: none; color: white; }
+    .modal-share-btn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+      border: none;
+      color: var(--text-muted);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .modal-share-btn:hover { background: var(--accent); color: white; }
+    .session-share-btn {
+      margin-left: auto;
+      padding: 3px 10px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .session-share-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     /* ── UGC Tabs ── */
     .ugc-tabs {
@@ -579,7 +605,10 @@
     <div class="modal-header">
       <h2 id="d-title"></h2>
       <p class="sub" id="d-sub"></p>
-      <button class="close-btn" onclick="closeDetail()">&#215;</button>
+      <div style="position:absolute;top:18px;right:18px;display:flex;gap:8px;align-items:center">
+        <button class="modal-share-btn" id="d-share-btn" title="分享全部场次">↗</button>
+        <button class="close-btn" style="position:static" onclick="closeDetail()">&#215;</button>
+      </div>
     </div>
     <div class="modal-body" id="d-body"></div>
   </div>
@@ -695,6 +724,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 // ─────────────────────────────────────────
 // 数据（手动录入，可持续通过UGC补充）
@@ -862,7 +892,6 @@ function render() {
       <div class="card" onclick="openDetail(${show.id})">
         <div class="card-cover" style="${show.image ? `background-image:url('${show.image}')` : `background:${show.cover}`}">
           ${show.image ? '' : `<div class="card-cover-placeholder"><span>🎭</span>暂无封面</div>`}
-          <button class="card-share-btn" onclick="openShareShow(${show.id});event.stopPropagation()">↗ 分享</button>
           ${upcomingCnt ? `<span class="session-badge">${upcomingCnt} 场</span>` : ''}
         </div>
         <div class="card-body">
@@ -888,6 +917,7 @@ function openDetail(id) {
 
   document.getElementById('d-title').textContent = show.name;
   document.getElementById('d-sub').textContent   = show.performer + ' · ' + show.sessions.length + ' 个场次';
+  document.getElementById('d-share-btn').onclick = () => openShareShow(id);
 
   const sorted = [...show.sessions].sort((a,b) => new Date(a.showTime) - new Date(b.showTime));
 
@@ -903,6 +933,7 @@ function openDetail(id) {
             ${ticketing ? '<span class="badge-sm badge-ticketing">抢票中</span>' : ''}
             ${past      ? '<span class="badge-sm badge-past">已结束</span>'      : ''}
             ${s.source === 'ugc' ? '<span class="badge-sm badge-ugc">用户补充</span>' : ''}
+            ${!past ? `<button class="session-share-btn" onclick="openShareSession(${id},'${s.city}');event.stopPropagation()">↗ 分享</button>` : ''}
           </div>
           <div class="info-grid">
             <div class="info-item">
@@ -964,10 +995,85 @@ function openUGCForShow(id) {
 }
 
 // ─────────────────────────────────────────
-// 分享
+// 二维码（下载千岛APP）
+// ─────────────────────────────────────────
+const QR_URL = 'https://qiandao-app.cn/download'; // 替换为真实下载链接
+let qrCanvas  = null;
+
+function initQR() {
+  return new Promise(resolve => {
+    const c = document.createElement('canvas');
+    QRCode.toCanvas(c, QR_URL, { width: 180, margin: 1, color: { dark: '#000000', light: '#ffffff' } }, err => {
+      if (!err) qrCanvas = c;
+      resolve();
+    });
+  });
+}
+
+// 在海报 canvas 上绘制二维码区块
+// x, y = 区块左上角；W = 海报宽度；dark = 是否深色背景
+function drawQRBlock(ctx, x, y, dark) {
+  const QR = 88;   // 二维码尺寸
+  const PAD = 14;  // 内边距
+  const BW  = QR + PAD * 2 + 130; // 区块总宽
+  const BH  = QR + PAD * 2;
+
+  // 背景圆角块
+  const bg = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  roundRect(ctx, x, y, BW, BH, 12, bg);
+
+  // 二维码
+  if (qrCanvas) {
+    ctx.drawImage(qrCanvas, x + PAD, y + PAD, QR, QR);
+  }
+
+  // 文案
+  const tx = x + PAD + QR + 14;
+  const ty = y + PAD;
+  const tc = dark ? '#ffffff' : '#111';
+  const tc2 = dark ? 'rgba(255,255,255,0.55)' : '#888';
+
+  ctx.fillStyle = '#ff6b35';
+  ctx.font = 'bold 13px PingFang SC, Noto Sans SC, sans-serif';
+  ctx.fillText('千岛 APP', tx, ty + 16);
+
+  ctx.fillStyle = tc;
+  ctx.font = 'bold 15px PingFang SC, Noto Sans SC, sans-serif';
+  ctx.fillText('最新演出 · 排期上新', tx, ty + 38);
+
+  ctx.fillStyle = tc2;
+  ctx.font = '12px PingFang SC, Noto Sans SC, sans-serif';
+  ctx.fillText('扫码下载，不错过每场好节目', tx, ty + 58);
+  ctx.fillText('抢票提醒 · 演出合集 · 演员主页', tx, ty + 76);
+}
+
+function roundRect(ctx, x, y, w, h, r, fill) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+
+// ─────────────────────────────────────────
 // ─────────────────────────────────────────
 let shareShowId  = null; // null = 全部演出
 let shareCity    = 'all';
+
+function openShareSession(showId, city) {
+  shareShowId = showId;
+  shareCity   = city;
+  const show  = shows.find(s => s.id === showId);
+  document.getElementById('share-title').textContent = show.name;
+  document.getElementById('share-sub').textContent   = show.performer + ' · ' + city;
+  buildShareCityBar();
+  updateSharePreview();
+  document.getElementById('shareOverlay').classList.add('show');
+}
 
 function openShareAll() {
   shareShowId = null;
@@ -1079,7 +1185,7 @@ function generateShowPoster(show) {
   const city     = shareCity === 'all' ? '全部城市' : shareCity;
   const canvas   = document.getElementById('posterCanvas');
   const ctx      = canvas.getContext('2d');
-  const W = 750, H = 1080;
+  const W = 750, H = 1150;
   canvas.width = W; canvas.height = H;
 
   const img = new Image();
@@ -1089,7 +1195,7 @@ function generateShowPoster(show) {
     ctx.fillStyle = '#0a0a0c';
     ctx.fillRect(0, 0, W, H);
 
-    // 封面图（降低透明度，铺满上半区）
+    // 封面图（降低透明度）
     ctx.globalAlpha = 0.38;
     const ir = img.width / img.height, cr = W / H;
     let dw, dh, dx, dy;
@@ -1098,11 +1204,11 @@ function generateShowPoster(show) {
     ctx.drawImage(img, dx, dy, dw, dh);
     ctx.globalAlpha = 1;
 
-    // 从中部往下的渐变遮罩，让文字区域清晰
-    const grad = ctx.createLinearGradient(0, H * 0.28, 0, H);
+    // 渐变遮罩
+    const grad = ctx.createLinearGradient(0, H * 0.25, 0, H);
     grad.addColorStop(0,    'rgba(10,10,12,0)');
-    grad.addColorStop(0.25, 'rgba(10,10,12,0.7)');
-    grad.addColorStop(0.5,  'rgba(10,10,12,0.92)');
+    grad.addColorStop(0.22, 'rgba(10,10,12,0.72)');
+    grad.addColorStop(0.45, 'rgba(10,10,12,0.93)');
     grad.addColorStop(1,    'rgba(10,10,12,1)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
@@ -1111,13 +1217,13 @@ function generateShowPoster(show) {
     ctx.fillStyle = '#ff6b35';
     ctx.fillRect(0, 0, W, 6);
 
-    // 顶部小标（左上角）
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    // 顶部小标
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.font = '15px PingFang SC, Noto Sans SC, sans-serif';
     ctx.fillText('脱口秀专场导览', 44, 42);
 
-    // 演出名（大字）
-    const textY = H * 0.55;
+    // 演出名
+    const textY = H * 0.5;
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 46px PingFang SC, Noto Sans SC, sans-serif';
     wrapText(ctx, show.name, 44, textY, W - 88, 58);
@@ -1132,10 +1238,9 @@ function generateShowPoster(show) {
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(44, textY + 98); ctx.lineTo(W - 44, textY + 98); ctx.stroke();
 
-    // 场次列表
-    let sy = textY + 130;
-    sessions.slice(0, 4).forEach(s => {
-      // 城市 + 场馆
+    // 场次列表（最多3场）
+    let sy = textY + 128;
+    sessions.slice(0, 3).forEach(s => {
       ctx.fillStyle = '#e0e0e0';
       ctx.font = 'bold 17px PingFang SC, Noto Sans SC, sans-serif';
       ctx.fillText(s.city, 44, sy);
@@ -1150,13 +1255,17 @@ function generateShowPoster(show) {
         ctx.font = 'bold 15px PingFang SC, Noto Sans SC, sans-serif';
         ctx.fillText(s.price, W - 180, sy + 22);
       }
-      sy += 68;
+      sy += 70;
     });
 
-    // 底部 URL
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
-    ctx.font = '13px PingFang SC, Noto Sans SC, sans-serif';
-    ctx.fillText(window.location.href, 44, H - 28);
+    // 分割线（二维码区块上方）
+    const qrY = H - 150;
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(44, qrY - 20); ctx.lineTo(W - 44, qrY - 20); ctx.stroke();
+
+    // 二维码区块
+    drawQRBlock(ctx, 44, qrY, true);
 
     downloadCanvas(canvas, show.name + '_' + city + '.png');
   };
@@ -1168,7 +1277,7 @@ function generateShowPoster(show) {
 function generateListPoster(list, city) {
   const canvas = document.getElementById('posterCanvas');
   const ctx    = canvas.getContext('2d');
-  const W = 750, ROW_H = 120, HEAD_H = 160, FOOT_H = 70;
+  const W = 750, ROW_H = 120, HEAD_H = 160, FOOT_H = 160;
   const H = HEAD_H + list.length * ROW_H + FOOT_H;
   canvas.width = W; canvas.height = H;
 
@@ -1216,9 +1325,13 @@ function generateListPoster(list, city) {
     y += ROW_H;
   });
 
-  ctx.fillStyle = '#444';
-  ctx.font = '14px PingFang SC, Noto Sans SC, sans-serif';
-  ctx.fillText(window.location.href, 50, H - 24);
+  // 二维码区块
+  const qrY = H - FOOT_H + 20;
+  ctx.strokeStyle = '#2a2a35';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(50, qrY - 12); ctx.lineTo(W - 50, qrY - 12); ctx.stroke();
+
+  drawQRBlock(ctx, 50, qrY, false);
 
   downloadCanvas(canvas, '脱口秀专场_' + city + '.png');
 }
@@ -1455,6 +1568,7 @@ loadApproved();
 render();
 buildCityBar();
 fillShowSelect();
+initQR();
 </script>
 </body>
 </html>
