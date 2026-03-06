@@ -426,6 +426,19 @@
     }
     .city-opt:hover, .city-opt.active { border-color: var(--accent); color: var(--accent); background: rgba(103, 76, 255,0.08); }
 
+    /* ── Show more ── */
+    .show-more-btn {
+      padding: 10px 32px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .show-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
     /* ── Empty state ── */
     .empty {
       grid-column: 1 / -1;
@@ -651,6 +664,9 @@
 </div>
 
 <div class="grid" id="grid"></div>
+<div id="show-more-wrap" style="display:none;text-align:center;padding:8px 0 48px">
+  <button class="show-more-btn" id="showMoreBtn" onclick="toggleShowAll()"></button>
+</div>
 
 <!-- ── Detail Modal ── -->
 <div class="overlay" id="detailOverlay" onclick="onOverlayClick(event,'detailOverlay')">
@@ -815,6 +831,14 @@ function nextSession(show) {
 let currentFilter     = 'all';
 let currentCity       = 'all';
 let currentTimeFilter = 'all';
+let showAll           = false;
+
+const PAGE_SIZE = 6;
+
+function toggleShowAll() {
+  showAll = !showAll;
+  render();
+}
 
 function setFilter(f, btn) {
   currentFilter = f;
@@ -929,10 +953,14 @@ function render() {
 
   if (!list.length) {
     grid.innerHTML = '<div class="empty">没有找到相关专场</div>';
+    document.getElementById('show-more-wrap').style.display = 'none';
     return;
   }
 
-  grid.innerHTML = list.map(show => {
+  const total = list.length;
+  const displayed = showAll ? list : list.slice(0, PAGE_SIZE);
+
+  grid.innerHTML = displayed.map(show => {
     const cities       = [...new Set(show.sessions.map(s => s.city))];
     const upcomingCnt  = show.sessions.filter(isUpcoming).length;
     const next         = nextSession(show);
@@ -963,6 +991,15 @@ function render() {
         </div>
       </div>`;
   }).join('');
+
+  const wrap = document.getElementById('show-more-wrap');
+  const btn  = document.getElementById('showMoreBtn');
+  if (total > PAGE_SIZE) {
+    wrap.style.display = 'block';
+    btn.textContent = showAll ? '收起' : `展开更多（还有 ${total - PAGE_SIZE} 个演出）`;
+  } else {
+    wrap.style.display = 'none';
+  }
 }
 
 // ─────────────────────────────────────────
