@@ -10,7 +10,7 @@
     :root {
       --bg: #0f0f11;
       --card-bg: #1a1a1f;
-      --accent: #ff6b35;
+      --accent: #674cff;
       --text: #e8e8e8;
       --text-muted: #888;
       --border: #2a2a35;
@@ -278,7 +278,7 @@
       border-radius: 10px;
       font-weight: 600;
     }
-    .badge-ticketing { background: rgba(255,107,53,0.15); color: var(--accent); }
+    .badge-ticketing { background: rgba(103, 76, 255,0.15); color: var(--accent); }
     .badge-past      { background: #252530; color: #555; }
     .badge-ugc       { background: rgba(76,175,80,0.15); color: #4caf50; }
     .info-grid {
@@ -383,7 +383,7 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .time-btn:hover, .time-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
+    .time-btn:hover, .time-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(103, 76, 255,0.08); }
     .city-dropdown-wrap { position: relative; }
     .city-toggle-btn {
       padding: 5px 13px;
@@ -397,7 +397,7 @@
       display: flex; align-items: center; gap: 5px;
       white-space: nowrap;
     }
-    .city-toggle-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
+    .city-toggle-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(103, 76, 255,0.08); }
     .city-toggle-btn .chevron { font-size: 10px; transition: transform 0.2s; }
     .city-toggle-btn.open .chevron { transform: rotate(180deg); }
     .city-dropdown {
@@ -424,7 +424,7 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .city-opt:hover, .city-opt.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
+    .city-opt:hover, .city-opt.active { border-color: var(--accent); color: var(--accent); background: rgba(103, 76, 255,0.08); }
 
     /* ── Empty state ── */
     .empty {
@@ -461,7 +461,7 @@
       backdrop-filter: blur(4px);
       transition: background 0.15s;
     }
-    .card-share-btn:hover { background: rgba(255,107,53,0.8); color: white; }
+    .card-share-btn:hover { background: rgba(103, 76, 255,0.8); color: white; }
     .share-city-bar { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
     .share-city-btn {
       padding: 4px 12px;
@@ -473,7 +473,7 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .share-city-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
+    .share-city-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(103, 76, 255,0.08); }
     #share-preview {
       width: 100%;
       height: 180px;
@@ -580,7 +580,7 @@
     }
     .btn-reject {
       padding: 7px 16px;
-      background: rgba(255,107,53,0.1);
+      background: rgba(103, 76, 255,0.1);
       border: 1px solid var(--accent);
       border-radius: 8px;
       color: var(--accent);
@@ -780,78 +780,9 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 // ─────────────────────────────────────────
-// 数据（手动录入，可持续通过UGC补充）
+// 演出数据（从 data.json 动态加载）
 // ─────────────────────────────────────────
-const shows = [
-  {
-    id: 1,
-    name: '《发现丑的眼睛2.0》',
-    performer: '鑫博',
-    image: 'images/faxianchoudeyanjing2.jpg',
-    cover: 'linear-gradient(135deg, #3d1a2a, #1a1a3d)',
-    sessions: [
-      { id:'s1', city:'北京', venue:'工人体育馆', price:'¥199-599', showTime:'2026-03-20 20:00', ticketSaleTime:'2026-03-08 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s2', city:'上海', venue:'梅赛德斯奔驰文化中心', price:'¥199-599', showTime:'2026-04-05 20:00', ticketSaleTime:'2026-03-15 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s3', city:'广州', venue:'广州大剧院', price:'¥179-499', showTime:'2026-04-18 20:00', ticketSaleTime:'2026-03-25 10:00', ticketLink:'', source:'official' },
-    ]
-  },
-  {
-    id: 2,
-    name: '《糖》',
-    performer: '唐香玉',
-    image: 'images/tag.jpg',
-    cover: 'linear-gradient(135deg, #1a3d2a, #2a3d1a)',
-    sessions: [
-      { id:'s4', city:'成都', venue:'城市音乐厅', price:'¥99-299', showTime:'2026-03-28 19:30', ticketSaleTime:'2026-03-10 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
-      { id:'s5', city:'杭州', venue:'杭州大剧院', price:'¥99-299', showTime:'2026-04-10 20:00', ticketSaleTime:'2026-03-20 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
-    ]
-  },
-  {
-    id: 3,
-    name: '《有出息》',
-    performer: '门腔',
-    image: 'images/youchuxi.jpg',
-    cover: 'linear-gradient(135deg, #3d2a1a, #2a1a3d)',
-    sessions: [
-      { id:'s6', city:'深圳', venue:'深圳保利剧院', price:'¥129-359', showTime:'2026-03-22 20:00', ticketSaleTime:'2026-03-06 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s7', city:'武汉', venue:'武汉天河剧院', price:'¥129-359', showTime:'2026-04-01 20:00', ticketSaleTime:'2026-03-12 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s8', city:'西安', venue:'西安音乐厅', price:'¥129-359', showTime:'2026-04-15 20:00', ticketSaleTime:'2026-03-22 10:00', ticketLink:'', source:'official' },
-    ]
-  },
-  {
-    id: 4,
-    name: '《小刘的奇妙冒险》',
-    performer: '刘仁铖',
-    image: 'images/xiaoliudeqimiaomaoxian.jpg',
-    cover: 'linear-gradient(135deg, #1a2a3d, #3d1a3d)',
-    sessions: [
-      { id:'s9', city:'北京', venue:'朝阳剧场', price:'¥99-259', showTime:'2026-03-15 20:00', ticketSaleTime:'2026-03-05 10:00', ticketLink:'https://www.maoyan.com', source:'official' },
-    ]
-  },
-  {
-    id: 5,
-    name: '《干吧！辣茶！》',
-    performer: '辣茶',
-    image: 'images/ganbalacha.jpg',
-    cover: 'linear-gradient(135deg, #2a3d3d, #1a3d2a)',
-    sessions: [
-      { id:'s10', city:'上海', venue:'兰心大戏院', price:'¥119-319', showTime:'2026-03-18 20:00', ticketSaleTime:'2026-03-07 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s11', city:'南京', venue:'南京保利大剧院', price:'¥119-319', showTime:'2026-04-03 20:00', ticketSaleTime:'2026-03-14 10:00', ticketLink:'', source:'official' },
-    ]
-  },
-  {
-    id: 6,
-    name: '《杨笠脱口秀专场》',
-    performer: '杨笠',
-    image: 'images/yanglituokouxiuzhuanchang.jpg',
-    cover: 'linear-gradient(135deg, #3d3d1a, #3d1a1a)',
-    sessions: [
-      { id:'s12', city:'北京', venue:'保利剧院', price:'¥159-459', showTime:'2026-03-25 20:00', ticketSaleTime:'2026-03-09 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s13', city:'成都', venue:'锦城艺术宫', price:'¥159-459', showTime:'2026-04-08 20:00', ticketSaleTime:'2026-03-18 10:00', ticketLink:'https://www.damai.cn', source:'official' },
-      { id:'s14', city:'重庆', venue:'施光南大剧院', price:'¥159-459', showTime:'2026-04-20 20:00', ticketSaleTime:'2026-03-28 10:00', ticketLink:'', source:'official' },
-    ]
-  },
-];
+let shows = [];
 
 // ─────────────────────────────────────────
 // 工具函数
@@ -986,6 +917,14 @@ function render() {
       });
     }
     return true;
+  });
+
+  // 按最近开演时间排序
+  const nowStr = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  list.sort((a, b) => {
+    const nextA = a.sessions.map(s => s.showTime).filter(t => t >= nowStr).sort()[0] || '9999';
+    const nextB = b.sessions.map(s => s.showTime).filter(t => t >= nowStr).sort()[0] || '9999';
+    return nextA < nextB ? -1 : nextA > nextB ? 1 : 0;
   });
 
   if (!list.length) {
@@ -1151,7 +1090,7 @@ function drawQRBlock(ctx, x, y, dark) {
   const tc = dark ? '#ffffff' : '#111';
   const tc2 = dark ? 'rgba(255,255,255,0.55)' : '#888';
 
-  ctx.fillStyle = '#ff6b35';
+  ctx.fillStyle = '#674cff';
   ctx.font = 'bold 13px PingFang SC, Noto Sans SC, sans-serif';
   ctx.fillText('千岛 APP', tx, ty + 16);
 
@@ -1332,7 +1271,7 @@ function generateShowPoster(show) {
     ctx.fillRect(0, 0, W, H);
 
     // 顶部橙色线
-    ctx.fillStyle = '#ff6b35';
+    ctx.fillStyle = '#674cff';
     ctx.fillRect(0, 0, W, 6);
 
     // 顶部小标
@@ -1347,12 +1286,12 @@ function generateShowPoster(show) {
     wrapText(ctx, show.name, 44, textY, W - 88, 58);
 
     // 演员名
-    ctx.fillStyle = '#ff6b35';
+    ctx.fillStyle = '#674cff';
     ctx.font = '22px PingFang SC, Noto Sans SC, sans-serif';
     ctx.fillText(show.performer, 44, textY + 78);
 
     // 分割线
-    ctx.strokeStyle = 'rgba(255,107,53,0.35)';
+    ctx.strokeStyle = 'rgba(103, 76, 255,0.35)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(44, textY + 98); ctx.lineTo(W - 44, textY + 98); ctx.stroke();
 
@@ -1369,7 +1308,7 @@ function generateShowPoster(show) {
       ctx.fillText(fmt(s.showTime), 44, sy + 42);
 
       if (s.price) {
-        ctx.fillStyle = '#ff6b35';
+        ctx.fillStyle = '#674cff';
         ctx.font = 'bold 15px PingFang SC, Noto Sans SC, sans-serif';
         ctx.fillText(s.price, W - 180, sy + 22);
       }
@@ -1402,10 +1341,10 @@ function generateListPoster(list, city) {
   ctx.fillStyle = '#0f0f11';
   ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = '#ff6b35';
+  ctx.fillStyle = '#674cff';
   ctx.fillRect(0, 0, W, 7);
 
-  ctx.fillStyle = '#ff6b35';
+  ctx.fillStyle = '#674cff';
   ctx.font = 'bold 38px PingFang SC, Noto Sans SC, sans-serif';
   ctx.fillText('脱口秀专场', 50, 72);
 
@@ -1434,7 +1373,7 @@ function generateListPoster(list, city) {
       ctx.font = '14px PingFang SC, Noto Sans SC, sans-serif';
       ctx.fillText(s.city + ' · ' + clipText(ctx, s.venue, 320), 50, y + 78);
       ctx.fillText(fmt(s.showTime), 50, y + 98);
-      if (s.price) { ctx.fillStyle = '#ff6b35'; ctx.fillText(s.price, W - 160, y + 78); }
+      if (s.price) { ctx.fillStyle = '#674cff'; ctx.fillText(s.price, W - 160, y + 78); }
     }
 
     ctx.strokeStyle = '#1a1a22';
@@ -1688,11 +1627,19 @@ function showToast(msg) {
 // ─────────────────────────────────────────
 // 初始化
 // ─────────────────────────────────────────
-loadApproved();
-render();
-buildCityBar();
-fillShowSelect();
-initQR();
+fetch('data.json')
+  .then(r => r.json())
+  .then(data => {
+    shows = data;
+    loadApproved();
+    render();
+    buildCityBar();
+    fillShowSelect();
+    initQR();
+  })
+  .catch(() => {
+    document.getElementById('grid').innerHTML = '<div class="empty">演出数据加载失败，请刷新重试</div>';
+  });
 </script>
 </body>
 </html>
