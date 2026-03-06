@@ -1,1 +1,150 @@
-[]
+[
+  {
+    "name": "《发现丑的眼睛2.0》",
+    "performer": "鑫博",
+    "image": "images/faxianchoudeyanjing2.jpg",
+    "sessions": [
+      {
+        "city": "北京",
+        "venue": "北京喜剧院",
+        "showTime": "2026-03-06 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1014894257593",
+        "source": "official",
+        "id": "s1_1"
+      },
+      {
+        "city": "北京",
+        "venue": "北京喜剧院",
+        "showTime": "2026-03-07 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1014894257593",
+        "source": "official",
+        "id": "s1_2"
+      },
+      {
+        "city": "北京",
+        "venue": "北京喜剧院",
+        "showTime": "2026-03-08 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1014894257593",
+        "source": "official",
+        "id": "s1_3"
+      },
+      {
+        "city": "宁波",
+        "venue": "宁波文化广场大剧院",
+        "showTime": "2026-03-14 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1013047118161",
+        "source": "official",
+        "id": "s1_4"
+      },
+      {
+        "city": "南京",
+        "venue": "南京保利大剧院大剧场",
+        "showTime": "2026-03-15 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1013214483070",
+        "source": "official",
+        "id": "s1_5"
+      },
+      {
+        "city": "珠海",
+        "venue": "珠海金湾艺术中信·大剧院（A馆）",
+        "showTime": "2026-03-21 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1015475445717",
+        "source": "official",
+        "id": "s1_6"
+      },
+      {
+        "city": "重庆",
+        "venue": "施光南大剧院",
+        "showTime": "2026-03-28 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1020484138450",
+        "source": "official",
+        "id": "s1_7"
+      },
+      {
+        "city": "成都",
+        "venue": "成都城市音乐厅·歌剧厅",
+        "showTime": "2026-03-29 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1022189652614",
+        "source": "official",
+        "id": "s1_8"
+      },
+      {
+        "city": "广州",
+        "venue": "广州蓓蕾剧院-大剧场",
+        "showTime": "2026-04-03 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1022229692394",
+        "source": "official",
+        "id": "s1_9"
+      },
+      {
+        "city": "厦门",
+        "venue": "厦门嘉庚剧院大剧场",
+        "showTime": "2026-04-06 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1020732014693",
+        "source": "official",
+        "id": "s1_10"
+      },
+      {
+        "city": "济南",
+        "venue": "济南历山剧院",
+        "showTime": "2026-04-10 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1025344617107",
+        "source": "official",
+        "id": "s1_11"
+      },
+      {
+        "city": "西安",
+        "venue": "西安索菲特人民大厦大剧院",
+        "showTime": "2026-04-12 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1025385301399",
+        "source": "official",
+        "id": "s1_12"
+      },
+      {
+        "city": "上海",
+        "venue": "艺海剧院-大剧场",
+        "showTime": "2026-04-17 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1026069763847",
+        "source": "official",
+        "id": "s1_13"
+      },
+      {
+        "city": "上海",
+        "venue": "艺海剧院-大剧场",
+        "showTime": "2026-04-18 19:30",
+        "ticketSaleTime": "",
+        "price": "¥180-480",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1026069763847",
+        "source": "official",
+        "id": "s1_14"
+      }
+    ],
+    "id": 1
+  }
+]
