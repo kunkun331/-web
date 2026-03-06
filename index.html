@@ -95,7 +95,7 @@
     }
     @media (max-width: 900px) {
       .grid { grid-template-columns: repeat(2, 1fr); padding: 0 20px 40px; }
-      .toolbar, header, .city-bar { padding-left: 20px; padding-right: 20px; }
+      .toolbar, header { padding-left: 20px; padding-right: 20px; }
     }
     @media (max-width: 560px) {
       .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -362,16 +362,18 @@
     }
     .btn-link:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── City bar ── */
-    .city-bar {
-      padding: 0 40px 16px;
+    /* ── Filter row ── */
+    .filter-row {
+      padding: 0 40px 14px;
       display: flex;
+      align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-    @media (max-width: 900px) { .city-bar { padding-left: 20px; padding-right: 20px; } }
-    .city-btn {
-      padding: 5px 14px;
+    @media (max-width: 900px) { .filter-row { padding-left: 20px; padding-right: 20px; } }
+    .filter-divider { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+    .time-btn {
+      padding: 5px 13px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 20px;
@@ -381,11 +383,48 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .city-btn:hover, .city-btn.active {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(255,107,53,0.08);
+    .time-btn:hover, .time-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
+    .city-dropdown-wrap { position: relative; }
+    .city-toggle-btn {
+      padding: 5px 13px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 5px;
+      white-space: nowrap;
     }
+    .city-toggle-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
+    .city-toggle-btn .chevron { font-size: 10px; transition: transform 0.2s; }
+    .city-toggle-btn.open .chevron { transform: rotate(180deg); }
+    .city-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      background: var(--modal-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex; flex-wrap: wrap; gap: 7px;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      min-width: 260px;
+      animation: popIn 0.15s ease;
+    }
+    .city-opt {
+      padding: 5px 13px;
+      background: var(--session-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .city-opt:hover, .city-opt.active { border-color: var(--accent); color: var(--accent); background: rgba(255,107,53,0.08); }
 
     /* ── Empty state ── */
     .empty {
@@ -595,7 +634,21 @@
   <button class="btn-add" onclick="openUGC()">+ 补充场次</button>
 </div>
 
-<div class="city-bar" id="cityBar"></div>
+<div class="filter-row">
+  <div style="display:flex;gap:6px">
+    <button class="time-btn active" onclick="setTimeFilter('all',this)">全部</button>
+    <button class="time-btn" onclick="setTimeFilter('week',this)">本周</button>
+    <button class="time-btn" onclick="setTimeFilter('month',this)">本月</button>
+    <button class="time-btn" onclick="setTimeFilter('next',this)">下月</button>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="city-dropdown-wrap">
+    <button class="city-toggle-btn" id="cityToggle" onclick="toggleCityMenu()">
+      📍 <span id="city-label">全部城市</span> <span class="chevron">▾</span>
+    </button>
+    <div class="city-dropdown" id="cityDropdown" style="display:none"></div>
+  </div>
+</div>
 
 <div class="grid" id="grid"></div>
 
@@ -828,8 +881,9 @@ function nextSession(show) {
 // ─────────────────────────────────────────
 // 渲染卡片
 // ─────────────────────────────────────────
-let currentFilter = 'all';
-let currentCity   = 'all';
+let currentFilter     = 'all';
+let currentCity       = 'all';
+let currentTimeFilter = 'all';
 
 function setFilter(f, btn) {
   currentFilter = f;
@@ -838,18 +892,74 @@ function setFilter(f, btn) {
   render();
 }
 
+function setTimeFilter(f, btn) {
+  currentTimeFilter = f;
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function getTimeRange(filter) {
+  const now = new Date();
+  if (filter === 'week') {
+    const day = now.getDay() || 7;
+    const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
+    return { start: mon, end: sun };
+  }
+  if (filter === 'month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    return { start, end };
+  }
+  if (filter === 'next') {
+    const start = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const end   = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59, 999);
+    return { start, end };
+  }
+  return null;
+}
+
 function setCity(city) {
   currentCity = city;
+  document.getElementById('city-label').textContent = city === 'all' ? '全部城市' : city;
+  const toggle = document.getElementById('cityToggle');
+  toggle.classList.toggle('active', city !== 'all');
+  closeCityMenu();
   buildCityBar();
   render();
 }
 
+function toggleCityMenu() {
+  const dropdown = document.getElementById('cityDropdown');
+  const toggle   = document.getElementById('cityToggle');
+  const isOpen   = dropdown.style.display !== 'none';
+  if (isOpen) {
+    closeCityMenu();
+  } else {
+    dropdown.style.display = 'flex';
+    toggle.classList.add('open');
+    setTimeout(() => document.addEventListener('click', outsideCityClick), 0);
+  }
+}
+
+function closeCityMenu() {
+  document.getElementById('cityDropdown').style.display = 'none';
+  document.getElementById('cityToggle').classList.remove('open');
+  document.removeEventListener('click', outsideCityClick);
+}
+
+function outsideCityClick(e) {
+  const wrap = document.querySelector('.city-dropdown-wrap');
+  if (wrap && !wrap.contains(e.target)) closeCityMenu();
+}
+
 function buildCityBar() {
   const cities = [...new Set(shows.flatMap(s => s.sessions.map(ss => ss.city)))].sort();
-  document.getElementById('cityBar').innerHTML =
+  document.getElementById('cityDropdown').innerHTML =
     ['all', ...cities].map(c =>
-      `<button class="city-btn${c === currentCity ? ' active' : ''}" onclick="setCity('${c}')">
-        ${c === 'all' ? '全部城市' : c}
+      `<button class="city-opt${c === currentCity ? ' active' : ''}" onclick="setCity('${c}')">
+        ${c === 'all' ? '全部' : c}
       </button>`
     ).join('');
 }
@@ -857,6 +967,8 @@ function buildCityBar() {
 function render() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   const grid = document.getElementById('grid');
+
+  const timeRange = getTimeRange(currentTimeFilter);
 
   let list = shows.filter(show => {
     const matchQ = !q
@@ -867,6 +979,12 @@ function render() {
     if (currentCity !== 'all' && !show.sessions.some(s => s.city === currentCity)) return false;
     if (currentFilter === 'upcoming')  return show.sessions.some(isUpcoming);
     if (currentFilter === 'ticketing') return show.sessions.some(isTicketing);
+    if (timeRange) {
+      return show.sessions.some(s => {
+        const d = new Date(s.showTime);
+        return d >= timeRange.start && d <= timeRange.end;
+      });
+    }
     return true;
   });
 
