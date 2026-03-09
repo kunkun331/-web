@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎤脱口秀转场上新早知道</title>
+  <title>🎤脱口秀专场上新早知道</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -655,7 +655,7 @@
 <body>
 
 <header>
-  <h1 onclick="onTitleClick()" style="cursor:default">🎤脱口秀转场<span>上新早知道</span></h1>
+  <h1 onclick="onTitleClick()" style="cursor:default">🎤脱口秀专场<span>上新早知道</span></h1>
   <p>全国巡演场次信息，点击专场查看详情与购票</p>
 </header>
 
@@ -1353,7 +1353,28 @@ function generateShowPoster(show) {
   const city     = shareCity === 'all' ? '全国' : shareCity;
   const canvas   = document.getElementById('posterCanvas');
   const ctx      = canvas.getContext('2d');
-  const W = 750, H = 1280;
+
+  // 图片区域：3:4比例，左右各留28px边距
+  const PAD = 28;
+  const IW  = 750 - PAD * 2;          // 694
+  const IH  = Math.round(IW * 4 / 3); // 925
+  const IY  = PAD;
+
+  // 信息卡片内容行高预算
+  const FONT_NAME = 'bold 38px PingFang SC, Noto Sans SC, sans-serif';
+  ctx.font = FONT_NAME;
+  const nameLines = getWrappedLines(ctx, show.name, IW - 64);
+  const cardContentH = nameLines.length * 52  // 演出名
+    + 16 + 34                                  // 演员名
+    + 24                                        // 分割线区
+    + (sessions.length ? 60 + 36 + (sessions[0].price ? 40 : 0) : 0)
+    + 12;
+  const CH  = 44 + cardContentH + 36;          // 卡片总高（上下内边距）
+  const CY  = IY + IH + 16;
+
+  // 底栏高度
+  const FOOT_H = 140;
+  const W = 750, H = CY + CH + 20 + FOOT_H;
   canvas.width = W; canvas.height = H;
 
   const img = new Image();
@@ -1363,87 +1384,83 @@ function generateShowPoster(show) {
     ctx.fillStyle = '#150a30';
     ctx.fillRect(0, 0, W, H);
 
-    // 2. 演出封面（圆角裁剪）
-    const IX = 28, IY = 36, IW = 694, IH = 660, IR = 20;
+    // 2. 演出封面（3:4 圆角裁剪）
     ctx.save();
-    roundRect(ctx, IX, IY, IW, IH, IR);
+    roundRect(ctx, PAD, IY, IW, IH, 20);
     ctx.clip();
     const ir = img.width / img.height, cr = IW / IH;
     let dw, dh, dx, dy;
-    if (ir > cr) { dh = IH; dw = IH * ir; dx = IX + (IW - dw) / 2; dy = IY; }
-    else         { dw = IW; dh = IW / ir; dx = IX; dy = IY + (IH - dh) / 2; }
+    if (ir > cr) { dh = IH; dw = IH * ir; dx = PAD + (IW - dw) / 2; dy = IY; }
+    else         { dw = IW; dh = IW / ir; dx = PAD; dy = IY + (IH - dh) / 2; }
     ctx.drawImage(img, dx, dy, dw, dh);
     ctx.restore();
 
-    // 3. 信息卡片
-    const CX = 28, CY = 714, CW = 694, CR = 16;
-    // 先算高度
-    ctx.font = 'bold 36px PingFang SC, Noto Sans SC, sans-serif';
-    const nameLines = getWrappedLines(ctx, show.name, CW - 64);
-    const CH = 44 + nameLines.length * 46 + 36 + 20 + (sessions.length ? 72 + 38 + (sessions[0].price ? 44 : 0) : 0) + 40;
-    ctx.fillStyle = 'rgba(10, 5, 28, 0.96)';
-    roundRect(ctx, CX, CY, CW, CH, CR, 'rgba(10, 5, 28, 0.96)');
+    // 3. 信息卡片背景
+    ctx.fillStyle = 'rgba(10, 5, 28, 0.97)';
+    roundRect(ctx, PAD, CY, IW, CH, 16, 'rgba(10, 5, 28, 0.97)');
 
-    const PX = CX + 32;
+    const PX = PAD + 32;  // 卡片内左边距
     let ty = CY + 44;
 
     // 演出名称
+    ctx.font = FONT_NAME;
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 36px PingFang SC, Noto Sans SC, sans-serif';
-    nameLines.forEach(line => { ctx.fillText(line, PX, ty); ty += 46; });
-    ty += 4;
+    nameLines.forEach(line => { ctx.fillText(line, PX, ty); ty += 52; });
 
-    // 演员名（紧跟标题）
+    // 演员名（与标题间距8px）
+    ty += 8;
+    ctx.font = '26px PingFang SC, Noto Sans SC, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.font = '24px PingFang SC, Noto Sans SC, sans-serif';
     ctx.fillText(show.performer, PX, ty);
-    ty += 36;
+    ty += 34;
 
-    // 细分割线
+    // 分割线
     ty += 20;
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(PX, ty); ctx.lineTo(CX + CW - 32, ty); ctx.stroke();
-    ty += 28;
+    ctx.beginPath(); ctx.moveTo(PX, ty); ctx.lineTo(PAD + IW - 32, ty); ctx.stroke();
+    ty += 24;
 
     if (sessions.length) {
       const s = sessions[0];
-      // 日期（大字醒目）
+
+      // 日期（大字）
+      ctx.font = 'bold 46px PingFang SC, Noto Sans SC, sans-serif';
       ctx.fillStyle = '#a294f8';
-      ctx.font = 'bold 44px PingFang SC, Noto Sans SC, sans-serif';
-      ctx.fillText(s.showTime.slice(0, 10).replace(/-/g, '.'), PX, ty + 38);
-      ty += 72;
+      ctx.fillText(s.showTime.slice(0, 10).replace(/-/g, '.'), PX, ty + 44);
+      ty += 60;
 
       // 城市 · 场馆
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
       ctx.font = '24px PingFang SC, Noto Sans SC, sans-serif';
-      ctx.fillText(clipText(ctx, s.city + ' · ' + s.venue, CW - 80), PX, ty);
-      ty += 44;
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText(clipText(ctx, s.city + ' · ' + s.venue, IW - 80), PX, ty + 12);
+      ty += 36;
 
       // 票价
       if (s.price) {
-        ctx.fillStyle = '#a294f8';
         ctx.font = 'bold 26px PingFang SC, Noto Sans SC, sans-serif';
-        ctx.fillText(s.price, PX, ty);
+        ctx.fillStyle = '#a294f8';
+        ctx.fillText(s.price, PX, ty + 12);
+        ty += 40;
       }
     }
 
-    // 4. 底部分割线 + 品牌 + 二维码
-    const FY = CY + CH + 28;
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    // 4. 底栏
+    const FY = CY + CH + 20;
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(28, FY); ctx.lineTo(W - 28, FY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PAD, FY); ctx.lineTo(W - PAD, FY); ctx.stroke();
 
-    ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 26px PingFang SC, Noto Sans SC, sans-serif';
-    ctx.fillText('🎤脱口秀转场上新早知道', 44, FY + 52);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('🎤脱口秀专场上新早知道', PAD + 16, FY + 48);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
     ctx.font = '20px PingFang SC, Noto Sans SC, sans-serif';
-    ctx.fillText('长按扫码，查看最新演出', 44, FY + 86);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillText('长按扫码，查看最新演出', PAD + 16, FY + 80);
 
     if (qrCanvas) {
-      ctx.drawImage(qrCanvas, W - 44 - 110, FY + 10, 110, 110);
+      ctx.drawImage(qrCanvas, W - PAD - 16 - 108, FY + 10, 108, 108);
     }
 
     downloadCanvas(canvas, show.name + '_' + city + '.png');
