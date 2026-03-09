@@ -140,7 +140,7 @@
   {
     "name": "《小刘的奇妙冒险》",
     "performer": "刘仁铖",
-    "image": "xiaoliudeqimiaomaoxian.jpg",
+    "image": "images/xiaoliudeqimiaomaoxian.jpg",
     "sessions": [
       {
         "city": "常州",
@@ -356,7 +356,7 @@
   {
     "name": "《有出息》",
     "performer": "门腔",
-    "image": "youchuxi.jpg",
+    "image": "images/youchuxi.jpg",
     "sessions": [
       {
         "city": "上海",
