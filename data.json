@@ -1,5 +1,211 @@
 [
   {
+    "name": "《糖》",
+    "performer": "唐香玉",
+    "image": "images/tag.jpg",
+    "sessions": [
+      {
+        "city": "上海",
+        "venue": "艺海剧院-大剧场",
+        "showTime": "2026-03-13 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1023570402871",
+        "source": "official",
+        "id": "s2_1"
+      },
+      {
+        "city": "上海",
+        "venue": "艺海剧院-大剧场",
+        "showTime": "2026-03-14 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s2_2"
+      },
+      {
+        "city": "上海",
+        "venue": "艺海剧院-大剧场",
+        "showTime": "2026-03-15 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s2_3"
+      },
+      {
+        "city": "武汉",
+        "venue": "武汉剧院",
+        "showTime": "2026-03-20 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1025288443215",
+        "source": "official",
+        "id": "s2_4"
+      },
+      {
+        "city": "武汉",
+        "venue": "武汉剧院",
+        "showTime": "2026-03-21 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s2_5"
+      },
+      {
+        "city": "苏州",
+        "venue": "苏州保利大剧院",
+        "showTime": "2026-03-27 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1027175410616",
+        "source": "official",
+        "id": "s2_6"
+      },
+      {
+        "city": "苏州",
+        "venue": "苏州保利大剧院",
+        "showTime": "2026-03-28 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s2_7"
+      },
+      {
+        "city": "南京",
+        "venue": "南京保利大剧院大剧场",
+        "showTime": "2026-03-29 19:30",
+        "ticketSaleTime": "2026-03-13 10:58",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1025261112913",
+        "source": "official",
+        "id": "s2_8"
+      },
+      {
+        "city": "深圳",
+        "venue": "南山文体中心聚橙剧院大剧院",
+        "showTime": "2026-04-03 20:00",
+        "ticketSaleTime": "2026-03-13 10:58",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1029279048770",
+        "source": "official",
+        "id": "s2_9"
+      },
+      {
+        "city": "深圳",
+        "venue": "南山文体中心聚橙剧院大剧院",
+        "showTime": "2026-04-04 20:00",
+        "ticketSaleTime": "2026-03-13 10:58",
+        "price": "¥220-580",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s2_10"
+      },
+      {
+        "city": "佛山",
+        "venue": "佛山琼花大剧院",
+        "showTime": "2026-04-06 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1029250936313",
+        "source": "official",
+        "id": "s2_11"
+      },
+      {
+        "city": "珠海",
+        "venue": "珠海华发中演大剧院歌剧厅",
+        "showTime": "2026-04-10 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1026856423754",
+        "source": "official",
+        "id": "s2_12"
+      },
+      {
+        "city": "广州",
+        "venue": "广州蓓蕾剧院",
+        "showTime": "2026-04-12 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1029248752363",
+        "source": "official",
+        "id": "s2_13"
+      }
+    ],
+    "id": 2
+  },
+  {
+    "name": "《小刘的奇妙冒险》",
+    "performer": "刘仁铖",
+    "image": "xiaoliudeqimiaomaoxian.jpg",
+    "sessions": [
+      {
+        "city": "常州",
+        "venue": "常州工人文化宫剧场",
+        "showTime": "2026-03-13 19:30",
+        "ticketSaleTime": "",
+        "price": "¥100-380",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1019883987773",
+        "source": "official",
+        "id": "s4_1"
+      },
+      {
+        "city": "上海",
+        "venue": "光新无限演艺中心",
+        "showTime": "2026-03-20 19:30",
+        "ticketSaleTime": "",
+        "price": "¥100-380",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1025555686371",
+        "source": "official",
+        "id": "s4_2"
+      },
+      {
+        "city": "上海",
+        "venue": "光新无限演艺中心",
+        "showTime": "2026-03-21 19:30",
+        "ticketSaleTime": "",
+        "price": "¥100-380",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1025555686371",
+        "source": "official",
+        "id": "s4_3"
+      },
+      {
+        "city": "杭州",
+        "venue": "杭州红星剧院",
+        "showTime": "2026-03-27 19:30",
+        "ticketSaleTime": "",
+        "price": "¥100-380",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1025641358726",
+        "source": "official",
+        "id": "s4_4"
+      },
+      {
+        "city": "秦皇岛",
+        "venue": "阿那亚艺术中心北岸馆",
+        "showTime": "2026-04-05 19:30",
+        "ticketSaleTime": "",
+        "price": "¥100-380",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1027140286469",
+        "source": "official",
+        "id": "s4_5"
+      },
+      {
+        "city": "深圳",
+        "venue": "深圳戏院",
+        "showTime": "2026-04-10 20:00",
+        "ticketSaleTime": "",
+        "price": "¥100-380",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1027140286469",
+        "source": "official",
+        "id": "s4_6"
+      }
+    ],
+    "id": 4
+  },
+  {
     "name": "《发现丑的眼睛2.0》",
     "performer": "鑫博",
     "image": "images/faxianchoudeyanjing2.jpg",
@@ -146,5 +352,151 @@
       }
     ],
     "id": 1
+  },
+  {
+    "name": "《有出息》",
+    "performer": "门腔",
+    "image": "youchuxi.jpg",
+    "sessions": [
+      {
+        "city": "上海",
+        "venue": "美琪大戏院",
+        "showTime": "2026-03-14 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1021569480130",
+        "source": "official",
+        "id": "s5_1"
+      },
+      {
+        "city": "上海",
+        "venue": "美琪大戏院",
+        "showTime": "2026-03-15 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1021569480130",
+        "source": "official",
+        "id": "s5_2"
+      },
+      {
+        "city": "上海",
+        "venue": "美琪大戏院",
+        "showTime": "2026-03-24 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1021569480130",
+        "source": "official",
+        "id": "s5_3"
+      },
+      {
+        "city": "上海",
+        "venue": "美琪大戏院",
+        "showTime": "2026-03-25 19:30",
+        "ticketSaleTime": "",
+        "price": "¥220-580",
+        "ticketLink": "https://m.damai.cn/shows/item.html?itemId=1021569480130",
+        "source": "official",
+        "id": "s5_4"
+      }
+    ],
+    "id": 5
+  },
+  {
+    "name": "《干吧！辣茶！》",
+    "performer": "辣茶",
+    "image": "images/ganbalacha.jpg",
+    "sessions": [
+      {
+        "city": "上海",
+        "venue": "高笑喜剧",
+        "showTime": "2026-02-06 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "#小程序://千岛组局/JmB7FUy2MNrXaYp",
+        "source": "official",
+        "id": "s3_1"
+      },
+      {
+        "city": "北京",
+        "venue": "干杯喜剧",
+        "showTime": "2026-02-07 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s3_2"
+      },
+      {
+        "city": "上海",
+        "venue": "高笑喜剧",
+        "showTime": "2026-03-21 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "#小程序://千岛组局/JmB7FUy2MNrXaYp",
+        "source": "official",
+        "id": "s3_3"
+      },
+      {
+        "city": "北京",
+        "venue": "趣听喜剧",
+        "showTime": "2026-03-28 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s3_4"
+      },
+      {
+        "city": "广州",
+        "venue": "三脚猪喜剧",
+        "showTime": "2026-04-18 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s3_5"
+      },
+      {
+        "city": "深圳",
+        "venue": "三脚猪喜剧",
+        "showTime": "2026-04-19 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s3_6"
+      },
+      {
+        "city": "沈阳",
+        "venue": "大风天喜剧",
+        "showTime": "2026-05-02 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s3_7"
+      },
+      {
+        "city": "杭州",
+        "venue": "一支麦喜剧",
+        "showTime": "2026-05-16 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s3_8"
+      },
+      {
+        "city": "石家庄",
+        "venue": "大风天喜剧",
+        "showTime": "2026-05-23 19:30",
+        "ticketSaleTime": "",
+        "price": "¥99-188",
+        "ticketLink": "",
+        "source": "official",
+        "id": "s3_9"
+      }
+    ],
+    "id": 3
   }
 ]
