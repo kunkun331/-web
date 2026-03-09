@@ -439,6 +439,26 @@
     }
     .show-more-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+    /* ── Detail: show header ── */
+    .d-show-header { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+    .d-show-thumb { width: 64px; height: 64px; border-radius: 10px; background-size: cover; background-position: center; background-color: var(--card-bg); flex-shrink: 0; }
+    .d-show-meta { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Detail: city grid ── */
+    .city-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+    .city-card { background: var(--session-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.15s; }
+    .city-card:hover { border-color: var(--accent); background: rgba(103,76,255,0.08); }
+    .city-card-name { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .city-card-date { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .city-card-status { font-size: 12px; }
+    .city-card-status.s-ticketing { color: var(--accent); }
+    .city-card-status.s-upcoming { color: #4caf50; }
+    .city-card-status.s-past { color: #555; }
+
+    /* ── Detail: city back ── */
+    .detail-back { display: inline-flex; align-items: center; gap: 5px; color: var(--text-muted); font-size: 13px; cursor: pointer; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); width: 100%; }
+    .detail-back:hover { color: var(--text); }
+
     /* ── Empty state ── */
     .empty {
       grid-column: 1 / -1;
@@ -1010,54 +1030,76 @@ function openDetail(id) {
   if (!show) return;
 
   document.getElementById('d-title').textContent = show.name;
-  document.getElementById('d-sub').textContent   = show.performer + ' · ' + show.sessions.length + ' 个场次';
+  const cities = [...new Set(show.sessions.map(s => s.city))];
+  document.getElementById('d-sub').textContent = show.performer + ' · ' + cities.length + ' 个城市';
   document.getElementById('d-share-btn').onclick = () => openShareShow(id);
 
-  const sorted = [...show.sessions].sort((a,b) => new Date(a.showTime) - new Date(b.showTime));
+  document.getElementById('d-body').innerHTML = `
+    <div class="d-show-header">
+      <div class="d-show-thumb" style="${show.image ? `background-image:url('${show.image}')` : 'background:var(--session-bg)'}"></div>
+      <div>
+        <div style="font-size:15px;font-weight:600">${show.name}</div>
+        <div class="d-show-meta">${show.performer} · 以下 ${cities.length} 个城市演出中</div>
+      </div>
+    </div>
+    <div class="city-grid">
+      ${cities.map(city => {
+        const cs = show.sessions.filter(s => s.city === city).sort((a,b) => a.showTime.localeCompare(b.showTime));
+        const first = cs[0].showTime.slice(5,10).replace('-','.');
+        const last  = cs[cs.length-1].showTime.slice(5,10).replace('-','.');
+        const dateStr = first === last ? first : first + '-' + last;
+        const allPast   = cs.every(isPast);
+        const anyTick   = cs.some(isTicketing);
+        const cls  = allPast ? 's-past' : anyTick ? 's-ticketing' : 's-upcoming';
+        const txt  = allPast ? '已结束'  : anyTick ? '抢票中'     : '即将开演';
+        return `<div class="city-card" onclick="openCityDetail(${id},'${city}')">
+          <div class="city-card-name">${city}</div>
+          <div class="city-card-date">${dateStr}</div>
+          <div class="city-card-status ${cls}">${txt}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="text-align:center">
+      <button class="btn-link" onclick="openUGCForShow(${show.id})">+ 补充此专场场次</button>
+    </div>
+  `;
+
+  document.getElementById('detailOverlay').classList.add('show');
+}
+
+function openCityDetail(showId, city) {
+  const show = shows.find(s => s.id === showId);
+  if (!show) return;
+
+  const cs = show.sessions.filter(s => s.city === city).sort((a,b) => a.showTime.localeCompare(b.showTime));
+
+  document.getElementById('d-sub').textContent = city + ' · ' + cs[0].venue;
 
   document.getElementById('d-body').innerHTML = `
-    <div class="section-label" style="margin-bottom:14px">全部场次</div>
-    ${sorted.map(s => {
+    <div class="detail-back" onclick="openDetail(${showId})">← 返回全部城市</div>
+    ${cs.map(s => {
       const past      = isPast(s);
       const ticketing = isTicketing(s);
       return `
         <div class="session-item" style="${past ? 'opacity:.45' : ''}">
           <div class="session-city">
-            <span>📍 ${s.city}</span>
+            <span>${s.venue}</span>
             ${ticketing ? '<span class="badge-sm badge-ticketing">抢票中</span>' : ''}
-            ${past      ? '<span class="badge-sm badge-past">已结束</span>'      : ''}
+            ${past      ? '<span class="badge-sm badge-past">已结束</span>'    : ''}
             ${s.source === 'ugc' ? '<span class="badge-sm badge-ugc">用户补充</span>' : ''}
-            ${!past ? `<button class="session-share-btn" onclick="openShareSession(${id},'${s.city}');event.stopPropagation()">↗ 分享</button>` : ''}
+            ${!past ? `<button class="session-share-btn" onclick="openShareSession(${showId},'${city}');event.stopPropagation()">↗ 分享</button>` : ''}
           </div>
           <div class="info-grid">
-            <div class="info-item">
-              <label>场馆</label>
-              <span>${s.venue}</span>
-            </div>
-            <div class="info-item">
-              <label>票价</label>
-              <span style="color:var(--accent);font-weight:600">${s.price || '待公布'}</span>
-            </div>
-            <div class="info-item">
-              <label>演出时间</label>
-              <span>${fmt(s.showTime)}</span>
-            </div>
-            <div class="info-item">
-              <label>开售时间</label>
-              <span>${fmt(s.ticketSaleTime)}</span>
-            </div>
+            <div class="info-item"><label>演出时间</label><span>${fmt(s.showTime)}</span></div>
+            <div class="info-item"><label>开售时间</label><span>${fmt(s.ticketSaleTime) || '待公布'}</span></div>
+            <div class="info-item"><label>票价</label><span style="color:var(--accent);font-weight:600">${s.price || '待公布'}</span></div>
           </div>
           ${s.ticketLink
             ? `<a class="ticket-btn" href="${s.ticketLink}" target="_blank" rel="noopener">🎟 立即购票</a>`
             : `<p class="no-link">购票链接待补充</p>`}
         </div>`;
     }).join('')}
-    <div style="margin-top:18px; text-align:center">
-      <button class="btn-link" onclick="openUGCForShow(${show.id})">+ 补充此专场场次</button>
-    </div>
   `;
-
-  document.getElementById('detailOverlay').classList.add('show');
 }
 
 function closeDetail() {
