@@ -174,6 +174,7 @@
       padding: 3px 8px;
       border-radius: 20px;
     }
+    .city-tag-more { color: var(--accent); background: rgba(103,76,255,0.1); }
     .next-show {
       display: flex;
       align-items: center;
@@ -985,13 +986,27 @@ function render() {
     const upcomingCnt  = show.sessions.filter(isUpcoming).length;
     const next         = nextSession(show);
     const hasTicketing = show.sessions.some(isTicketing);
+    const allPast      = show.sessions.every(isPast);
     const prices       = show.sessions.map(s => s.price).filter(Boolean);
     const minPrice     = prices.length ? prices[0] : '';
 
-    const dotColor = !next ? '#444' : hasTicketing ? 'var(--accent)' : '#4caf50';
-    const nextTxt  = !next
-      ? '<span style="color:#444">暂无即将演出</span>'
-      : (hasTicketing ? '<span style="color:var(--accent)">抢票中 · </span>' : '') + fmt(next.showTime);
+    // 城市标签：最多显示6个，超出用 ...
+    const MAX_CITIES = 6;
+    const cityTagsHtml = cities.slice(0, MAX_CITIES).map(c => `<span class="city-tag">${c}</span>`).join('')
+      + (cities.length > MAX_CITIES ? `<span class="city-tag city-tag-more">+${cities.length - MAX_CITIES}</span>` : '');
+
+    // 状态行
+    let dotColor, nextTxt;
+    if (allPast) {
+      dotColor = '#444';
+      nextTxt  = '<span style="color:#555">已结束</span>';
+    } else if (next) {
+      dotColor = hasTicketing ? 'var(--accent)' : '#4caf50';
+      nextTxt  = (hasTicketing ? '<span style="color:var(--accent)">抢票中 · </span>' : '<span style="color:#4caf50">巡演中 · </span>') + fmt(next.showTime);
+    } else {
+      dotColor = '#4caf50';
+      nextTxt  = '<span style="color:#4caf50">巡演中</span>';
+    }
 
     return `
       <div class="card" onclick="openDetail(${show.id})">
@@ -1003,7 +1018,7 @@ function render() {
           <div class="card-title">${show.name}</div>
           <div class="card-performer">${show.performer}</div>
           ${minPrice ? `<div class="card-price">${minPrice}</div>` : ''}
-          <div class="city-tags">${cities.map(c => `<span class="city-tag">${c}</span>`).join('')}</div>
+          <div class="city-tags">${cityTagsHtml}</div>
           <div class="next-show">
             <span class="dot" style="background:${dotColor}"></span>
             <span>${nextTxt}</span>
