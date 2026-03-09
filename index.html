@@ -453,7 +453,7 @@
     .city-card-date { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
     .city-card-status { font-size: 12px; }
     .city-card-status.s-ticketing { color: var(--accent); }
-    .city-card-status.s-upcoming { color: #4caf50; }
+    .city-card-status.s-upcoming { color: #ece8fb; }
     .city-card-status.s-past { color: #555; }
 
     /* ── Detail: city back ── */
@@ -1001,11 +1001,11 @@ function render() {
       dotColor = '#444';
       nextTxt  = '<span style="color:#555">已结束</span>';
     } else if (next) {
-      dotColor = hasTicketing ? 'var(--accent)' : '#4caf50';
-      nextTxt  = (hasTicketing ? '<span style="color:var(--accent)">抢票中 · </span>' : '<span style="color:#4caf50">巡演中 · </span>') + fmt(next.showTime);
+      dotColor = hasTicketing ? 'var(--accent)' : '#ece8fb';
+      nextTxt  = (hasTicketing ? '<span style="color:var(--accent)">抢票中 · </span>' : '<span style="color:#ece8fb">巡演中 · </span>') + fmt(next.showTime);
     } else {
-      dotColor = '#4caf50';
-      nextTxt  = '<span style="color:#4caf50">巡演中</span>';
+      dotColor = '#ece8fb';
+      nextTxt  = '<span style="color:#ece8fb">巡演中</span>';
     }
 
     return `
@@ -1088,7 +1088,14 @@ function openCityDetail(showId, city) {
   const show = shows.find(s => s.id === showId);
   if (!show) return;
 
-  const cs = show.sessions.filter(s => s.city === city).sort((a,b) => a.showTime.localeCompare(b.showTime));
+  const cs = show.sessions
+    .filter(s => s.city === city)
+    .sort((a, b) => {
+      const aPast = isPast(a) ? 1 : 0;
+      const bPast = isPast(b) ? 1 : 0;
+      if (aPast !== bPast) return aPast - bPast;
+      return a.showTime.localeCompare(b.showTime);
+    });
 
   detailLevel = 2;
   document.getElementById('d-sub').textContent = city + ' · ' + cs[0].venue;
