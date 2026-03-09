@@ -1029,6 +1029,8 @@ function openDetail(id) {
   const show = shows.find(s => s.id === id);
   if (!show) return;
 
+  detailShowId = id;
+  detailLevel  = 1;
   document.getElementById('d-title').textContent = show.name;
   const cities = [...new Set(show.sessions.map(s => s.city))];
   document.getElementById('d-sub').textContent = show.performer + ' · ' + cities.length + ' 个城市';
@@ -1073,6 +1075,7 @@ function openCityDetail(showId, city) {
 
   const cs = show.sessions.filter(s => s.city === city).sort((a,b) => a.showTime.localeCompare(b.showTime));
 
+  detailLevel = 2;
   document.getElementById('d-sub').textContent = city + ' · ' + cs[0].venue;
 
   document.getElementById('d-body').innerHTML = `
@@ -1102,8 +1105,15 @@ function openCityDetail(showId, city) {
   `;
 }
 
+let detailShowId  = null;
+let detailLevel   = 1;   // 1 = 城市列表，2 = 城市详情
+
 function closeDetail() {
-  closeOverlay('detailOverlay');
+  if (detailLevel === 2) {
+    openDetail(detailShowId);
+  } else {
+    closeOverlay('detailOverlay');
+  }
 }
 
 // ─────────────────────────────────────────
