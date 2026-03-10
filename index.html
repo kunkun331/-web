@@ -82,6 +82,34 @@
       transition: opacity 0.15s;
     }
     .btn-add:hover { opacity: 0.85; }
+    .btn-profile {
+      padding: 8px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-profile:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Profile stats ── */
+    .profile-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+    .stat-card { background: var(--session-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .profile-list { display: flex; flex-direction: column; gap: 10px; }
+    .profile-item { background: var(--session-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; }
+    .profile-item-title { font-weight: 600; margin-bottom: 4px; }
+    .profile-item-meta { color: var(--text-muted); font-size: 12px; }
+    .profile-status-pending  { color: #f5a623; }
+    .profile-status-approved { color: #a294f8; }
+    .profile-status-rejected { color: #555; }
+
+    /* ── Admin delete btn ── */
+    .btn-delete { padding: 6px 14px; background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.3); border-radius: 6px; color: #ff6060; font-size: 13px; cursor: pointer; }
+    .btn-delete:hover { background: rgba(255,80,80,0.2); }
 
     /* ── Grid ── */
     .grid {
@@ -666,6 +694,7 @@
   <button class="filter-btn" onclick="setFilter('ticketing', this)">抢票中</button>
   <button class="btn-share" onclick="openShareAll()">↗ 分享</button>
   <button class="btn-add" onclick="openUGC()">+ 补充场次</button>
+  <button class="btn-profile" onclick="openProfile()" title="个人中心">👤</button>
 </div>
 
 <div class="filter-row">
@@ -805,7 +834,23 @@
       <p class="sub" id="admin-sub"></p>
       <button class="close-btn" onclick="closeOverlay('adminOverlay')">&#215;</button>
     </div>
+    <div class="ugc-tabs" style="margin:0 24px 0">
+      <button class="ugc-tab active" id="admin-tab-pending" onclick="switchAdminTab('pending',this)">待审核</button>
+      <button class="ugc-tab" id="admin-tab-approved" onclick="switchAdminTab('approved',this)">已通过</button>
+    </div>
     <div class="modal-body" id="admin-body"></div>
+  </div>
+</div>
+
+<!-- ── Profile Modal ── -->
+<div class="overlay" id="profileOverlay" onclick="onOverlayClick(event,'profileOverlay')">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h2>个人中心</h2>
+      <p class="sub">本设备的贡献记录</p>
+      <button class="close-btn" onclick="closeOverlay('profileOverlay')">&#215;</button>
+    </div>
+    <div class="modal-body" id="profile-body"></div>
   </div>
 </div>
 
@@ -1099,7 +1144,7 @@ function openCityDetail(showId, city) {
           </div>
           ${s.ticketLink
             ? `<a class="ticket-btn" href="${s.ticketLink}" target="_blank" rel="noopener">🎟 立即购票</a>`
-            : `<p class="no-link">购票链接待补充</p>`}
+            : `<p class="no-link">购票链接待补充 · <button class="btn-link" style="font-size:12px" onclick="openSupplementSession(${showId},'${s.id}');event.stopPropagation()">+ 补充</button></p>`}
         </div>`;
     }).join('')}
   `;
@@ -1564,7 +1609,7 @@ function downloadCanvas(canvas, filename) {
 // ─────────────────────────────────────────
 // UGC 提交 & 审核
 // ─────────────────────────────────────────
-const ADMIN_PASSWORD = 'talkshow2026'; // 可自行修改
+const ADMIN_PASSWORD = '88888888';
 let ugcType = 'session';
 let titleClickCount = 0;
 let titleClickTimer  = null;
@@ -1673,19 +1718,37 @@ function openAdmin() {
   document.getElementById('adminOverlay').classList.add('show');
 }
 
+let adminTab = 'pending';
+
+function switchAdminTab(tab, btn) {
+  adminTab = tab;
+  document.querySelectorAll('#adminOverlay .ugc-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAdmin();
+}
+
 function renderAdmin() {
-  const pending = getPending().filter(p => p.status === 'pending');
-  document.getElementById('admin-sub').textContent = `待审核 ${pending.length} 条`;
+  const all     = getPending();
+  const pending  = all.filter(p => p.status === 'pending');
+  const approved = all.filter(p => p.status === 'approved');
+  document.getElementById('admin-sub').textContent = `待审核 ${pending.length} 条 · 已通过 ${approved.length} 条`;
   const body = document.getElementById('admin-body');
-  if (!pending.length) {
-    body.innerHTML = '<div class="admin-empty">暂无待审核内容</div>';
+  const list = adminTab === 'pending' ? pending : approved;
+
+  if (!list.length) {
+    body.innerHTML = `<div class="admin-empty">${adminTab === 'pending' ? '暂无待审核内容' : '暂无已通过内容'}</div>`;
     return;
   }
-  body.innerHTML = pending.map(item => {
-    const showName  = item.type === 'session'
-      ? (shows.find(s => s.id === item.showId)?.name || '未知演出')
+
+  body.innerHTML = list.map(item => {
+    const showName  = item.type === 'session' || item.type === 'supplement'
+      ? (shows.find(s => s.id === item.showId)?.name || item.name || '未知演出')
       : item.name;
-    const typeLabel = item.type === 'session' ? '补充场次' : '新增演出';
+    const typeLabel = item.type === 'supplement' ? '补充信息' : item.type === 'session' ? '补充场次' : '新增演出';
+    const actions   = adminTab === 'pending'
+      ? `<button class="btn-approve" onclick="approveItem('${item.id}')">通过</button>
+         <button class="btn-reject"  onclick="rejectItem('${item.id}')">拒绝</button>`
+      : `<button class="btn-delete"  onclick="deleteApproved('${item.id}')">删除</button>`;
     return `
       <div class="admin-item">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
@@ -1697,21 +1760,88 @@ function renderAdmin() {
         </div>
         <div style="font-size:13px;color:var(--text-muted);line-height:2">
           ${item.type === 'show' ? `演员：${item.performer}<br>` : ''}
-          城市：${item.city} · 场馆：${item.venue}<br>
-          演出时间：${item.showTime}<br>
+          ${item.city ? `城市：${item.city} · 场馆：${item.venue}<br>` : ''}
+          ${item.showTime ? `演出时间：${item.showTime}<br>` : ''}
           ${item.ticketSaleTime ? `开售时间：${item.ticketSaleTime}<br>` : ''}
           ${item.price ? `票价：${item.price}<br>` : ''}
           ${item.ticketLink ? `购票链接：<a href="${item.ticketLink}" target="_blank" style="color:var(--accent)">${item.ticketLink}</a>` : ''}
+          ${item.note ? `备注：${item.note}` : ''}
         </div>
-        <div class="admin-actions">
-          <button class="btn-approve" onclick="approveItem('${item.id}')">通过</button>
-          <button class="btn-reject"  onclick="rejectItem('${item.id}')">拒绝</button>
-        </div>
+        <div class="admin-actions">${actions}</div>
       </div>`;
   }).join('');
 }
 
-function approveItem(id) {
+function deleteApproved(id) {
+  if (!confirm('确认删除这条已通过的内容？')) return;
+  const pending = getPending().filter(p => p.id !== id);
+  savePending(pending);
+  loadApproved();
+  buildCityBar();
+  render();
+  renderAdmin();
+  showToast('已删除');
+}
+
+function openProfile() {
+  const all      = getPending();
+  const total    = all.length;
+  const pending  = all.filter(p => p.status === 'pending').length;
+  const approved = all.filter(p => p.status === 'approved').length;
+  const rejected = total - pending - approved;
+
+  document.getElementById('profile-body').innerHTML = `
+    <div class="profile-stats">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">累计提交</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#f5a623">${pending}</div><div class="stat-label">待审核</div></div>
+      <div class="stat-card"><div class="stat-num">${approved}</div><div class="stat-label">已通过</div></div>
+    </div>
+    ${total ? `
+    <div class="section-label" style="margin-bottom:12px">提交记录</div>
+    <div class="profile-list">
+      ${[...all].reverse().map(item => {
+        const showName = item.type === 'session' || item.type === 'supplement'
+          ? (shows.find(s => s.id === item.showId)?.name || '未知演出')
+          : item.name;
+        const typeMap  = { session: '补充场次', show: '新增演出', supplement: '补充信息' };
+        const statusMap = { pending: ['待审核','profile-status-pending'], approved: ['已通过','profile-status-approved'] };
+        const [statusTxt, statusCls] = statusMap[item.status] || ['已拒绝','profile-status-rejected'];
+        return `<div class="profile-item">
+          <div class="profile-item-title">${showName}</div>
+          <div class="profile-item-meta">
+            ${typeMap[item.type] || ''} · ${item.city || ''} · ${item.submittedAt}
+            <span class="${statusCls}" style="margin-left:8px">${statusTxt}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : '<div style="text-align:center;color:var(--text-muted);padding:40px 0">还没有提交过内容</div>'}
+  `;
+  document.getElementById('profileOverlay').classList.add('show');
+}
+
+function openSupplementSession(showId, sessionId) {
+  const show = shows.find(s => s.id === showId);
+  const sess = show?.sessions.find(s => s.id === sessionId);
+  if (!sess) return;
+  closeDetail();
+  // 打开 UGC 弹窗，预填信息，类型设为 supplement
+  ugcType = 'supplement';
+  fillShowSelect(showId);
+  document.getElementById('u-city').value  = sess.city;
+  document.getElementById('u-venue').value = sess.venue;
+  const noteEl = document.getElementById('u-note');
+  if (noteEl) noteEl.value = '';
+  // 把要补充的 sessionId 存起来
+  document.getElementById('ugcOverlay').dataset.supplementId = sessionId;
+  document.getElementById('ugcOverlay').dataset.showId = showId;
+  // 切换到补充场次 tab（复用现有表单）
+  ugcType = 'session';
+  document.querySelectorAll('.ugc-tab').forEach((b, i) => b.classList.toggle('active', i === 0));
+  document.getElementById('ugc-session-form').style.display = '';
+  document.getElementById('ugc-show-form').style.display = 'none';
+  document.getElementById('ugcOverlay').classList.add('show');
+  showToast('请补充该场次缺失的信息（购票链接/票价/开售时间）');
+}
   const pending = getPending();
   const item = pending.find(p => p.id === id);
   if (item) {
