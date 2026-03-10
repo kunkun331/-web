@@ -657,6 +657,35 @@
       font-size: 14px;
     }
 
+    /* ── Bottom Tab Bar ── */
+    .tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: #111118;
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tab-bar-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .tab-bar-btn.active { color: var(--accent); }
+    .tab-icon { font-size: 18px; line-height: 1; }
+    body { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+
     /* ── Toast ── */
     .toast {
       position: fixed;
@@ -682,6 +711,7 @@
 </head>
 <body>
 
+<div id="page-main">
 <header>
   <h1 onclick="onTitleClick()" style="cursor:default">🎤脱口秀专场<span>上新早知道</span></h1>
   <p>全国巡演场次信息，点击专场查看详情与购票</p>
@@ -694,7 +724,6 @@
   <button class="filter-btn" onclick="setFilter('ticketing', this)">抢票中</button>
   <button class="btn-share" onclick="openShareAll()">↗ 分享</button>
   <button class="btn-add" onclick="openUGC()">+ 补充场次</button>
-  <button class="btn-profile" onclick="openProfile()" title="个人中心">👤</button>
 </div>
 
 <div class="filter-row">
@@ -714,6 +743,28 @@
 </div>
 
 <div class="grid" id="grid"></div>
+</div><!-- /page-main -->
+
+<!-- ── 个人中心页面 ── -->
+<div id="page-profile" style="display:none">
+  <header>
+    <h1>个人中心</h1>
+    <p>本设备的贡献记录</p>
+  </header>
+  <div style="padding:20px 24px" id="profile-body"></div>
+</div>
+
+<!-- ── 底部 Tab Bar ── -->
+<div class="tab-bar">
+  <button class="tab-bar-btn active" id="tab-btn-main" onclick="switchTab('main')">
+    <span class="tab-icon">🎭</span>
+    <span>专场信息</span>
+  </button>
+  <button class="tab-bar-btn" id="tab-btn-profile" onclick="switchTab('profile')">
+    <span class="tab-icon">👤</span>
+    <span>个人中心</span>
+  </button>
+</div>
 
 <!-- ── Detail Modal ── -->
 <div class="overlay" id="detailOverlay" onclick="onOverlayClick(event,'detailOverlay')">
@@ -842,17 +893,6 @@
   </div>
 </div>
 
-<!-- ── Profile Modal ── -->
-<div class="overlay" id="profileOverlay" onclick="onOverlayClick(event,'profileOverlay')">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header">
-      <h2>个人中心</h2>
-      <p class="sub">本设备的贡献记录</p>
-      <button class="close-btn" onclick="closeOverlay('profileOverlay')">&#215;</button>
-    </div>
-    <div class="modal-body" id="profile-body"></div>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
@@ -1783,6 +1823,14 @@ function deleteApproved(id) {
   showToast('已删除');
 }
 
+function switchTab(tab) {
+  document.getElementById('page-main').style.display    = tab === 'main'    ? '' : 'none';
+  document.getElementById('page-profile').style.display = tab === 'profile' ? '' : 'none';
+  document.getElementById('tab-btn-main').classList.toggle('active',    tab === 'main');
+  document.getElementById('tab-btn-profile').classList.toggle('active', tab === 'profile');
+  if (tab === 'profile') openProfile();
+}
+
 function openProfile() {
   const all      = getPending();
   const total    = all.length;
@@ -1791,7 +1839,6 @@ function openProfile() {
   const rejected = total - pending - approved;
 
   document.getElementById('profile-body').innerHTML = `
-    <div class="profile-stats">
       <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">累计提交</div></div>
       <div class="stat-card"><div class="stat-num" style="color:#f5a623">${pending}</div><div class="stat-label">待审核</div></div>
       <div class="stat-card"><div class="stat-num">${approved}</div><div class="stat-label">已通过</div></div>
@@ -1816,7 +1863,6 @@ function openProfile() {
       }).join('')}
     </div>` : '<div style="text-align:center;color:var(--text-muted);padding:40px 0">还没有提交过内容</div>'}
   `;
-  document.getElementById('profileOverlay').classList.add('show');
 }
 
 function openSupplementSession(showId, sessionId) {
