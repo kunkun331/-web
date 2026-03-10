@@ -1842,6 +1842,8 @@ function openSupplementSession(showId, sessionId) {
   document.getElementById('ugcOverlay').classList.add('show');
   showToast('请补充该场次缺失的信息（购票链接/票价/开售时间）');
 }
+
+function approveItem(id) {
   const pending = getPending();
   const item = pending.find(p => p.id === id);
   if (item) {
