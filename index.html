@@ -829,8 +829,10 @@ const now = new Date();
 function fmt(str) {
   if (!str) return '待公布';
   const d = new Date(str);
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
-       + ' ' + d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+  // 只有日期（无时间 或 时间为 00:00）时，不显示时间
+  const hasTime = str.includes(':') && !str.endsWith('00:00') && !str.endsWith('T00:00');
+  return hasTime ? dateStr + ' ' + d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : dateStr;
 }
 
 function isPast(s)      { return new Date(s.showTime) <= now; }
