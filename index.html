@@ -341,6 +341,30 @@
     .ticket-btn:hover { opacity: 0.85; }
     .no-link { font-size: 12px; color: #555; margin-top: 2px; }
 
+    /* ── 多平台购票 + 比价 ── */
+    .ticket-platforms { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .ticket-platform-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px;
+      font-weight: 600; text-decoration: none; transition: opacity 0.15s; color: white;
+    }
+    .ticket-platform-btn:hover { opacity: 0.82; }
+    .ticket-platform-btn.damai  { background: #FF6000; }
+    .ticket-platform-btn.maoyan { background: #1DC060; }
+    .ticket-platform-btn.other  { background: var(--accent); }
+    .price-compare {
+      margin-top: 12px; padding: 12px 14px;
+      background: var(--session-bg); border: 1px solid var(--border); border-radius: 10px;
+    }
+    .compare-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .compare-links { display: flex; flex-wrap: wrap; gap: 7px; }
+    .compare-link {
+      padding: 5px 13px; border-radius: 20px; font-size: 12px;
+      border: 1px solid var(--border); color: var(--text-muted);
+      text-decoration: none; transition: all 0.15s;
+    }
+    .compare-link:hover { border-color: var(--accent); color: var(--accent); }
+
     /* ── UGC Form ── */
     .form-group { margin-bottom: 14px; }
     .form-group label {
@@ -1182,9 +1206,30 @@ function openCityDetail(showId, city) {
             <div class="info-item"><label>开售时间</label><span>${fmt(s.ticketSaleTime) || '待公布'}</span></div>
             <div class="info-item"><label>票价</label><span style="color:var(--accent);font-weight:600">${s.price || '待公布'}</span></div>
           </div>
-          ${s.ticketLink
-            ? `<a class="ticket-btn" href="${s.ticketLink}" target="_blank" rel="noopener">🎟 立即购票</a>`
-            : `<p class="no-link">购票链接待补充 · <button class="btn-link" style="font-size:12px" onclick="openSupplementSession(${showId},'${s.id}');event.stopPropagation()">+ 补充</button></p>`}
+          ${(() => {
+            const links = [];
+            if (s.link_damai  || (s.ticketLink && !s.link_maoyan && !s.link_other)) {
+              links.push({ cls: 'damai',  label: '🎟 大麦购票', url: s.link_damai || s.ticketLink });
+            }
+            if (s.link_maoyan) links.push({ cls: 'maoyan', label: '🎬 猫眼购票', url: s.link_maoyan });
+            if (s.link_other)  links.push({ cls: 'other',  label: '🔗 其他渠道', url: s.link_other });
+            const q = encodeURIComponent(show.name);
+            const platformBtns = links.length
+              ? `<div class="ticket-platforms">${links.map(l =>
+                  `<a class="ticket-platform-btn ${l.cls}" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`
+                ).join('')}</div>`
+              : `<p class="no-link" style="margin-top:12px">购票链接待补充 · <button class="btn-link" style="font-size:12px" onclick="openSupplementSession(${showId},'${s.id}');event.stopPropagation()">+ 补充</button></p>`;
+            return platformBtns + `
+              <div class="price-compare">
+                <div class="compare-title">⚡ 比价搜索（点击跳转各平台查看最新价格）</div>
+                <div class="compare-links">
+                  <a class="compare-link" href="https://search.damai.cn/search.html?keyword=${q}" target="_blank" rel="noopener">大麦</a>
+                  <a class="compare-link" href="https://www.maoyan.com/search?kw=${q}" target="_blank" rel="noopener">猫眼</a>
+                  <a class="compare-link" href="https://www.showstart.com/search?keyword=${q}" target="_blank" rel="noopener">秀动</a>
+                  <a class="compare-link" href="https://www.piaojuwang.com/search?kw=${q}" target="_blank" rel="noopener">票居网</a>
+                </div>
+              </div>`;
+          })()}
         </div>`;
     }).join('')}
   `;
