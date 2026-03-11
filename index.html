@@ -222,7 +222,7 @@
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.72);
-      z-index: 200;
+      z-index: 400;
       display: none;
       align-items: center;
       justify-content: center;
@@ -1447,9 +1447,10 @@ function copyShareText() {
 function generatePoster() {
   const list = getShareShows().filter(show => getShareSessions(show).length);
   const city = shareCity === 'all' ? '全国' : shareCity;
-  // 单演出且有封面图 → 封面海报
-  if (shareShowId && list.length === 1 && list[0].image) {
-    generateShowPoster(list[0]);
+  if (shareShowId && list.length === 1 && shareCity === 'all') {
+    generateTourPoster(list[0]);        // 全国巡演网格海报
+  } else if (shareShowId && list.length === 1 && list[0].image) {
+    generateShowPoster(list[0]);        // 单城市封面海报
   } else {
     generateListPoster(list, city);
   }
@@ -1575,6 +1576,133 @@ function generateShowPoster(show) {
   };
   img.onerror = () => generateListPoster([show], city);
   img.src = show.image;
+}
+
+// ── 全国巡演网格海报 ──────────────────────────
+function generateTourPoster(show) {
+  const sessions = getShareSessions(show);
+  if (!sessions.length) { generateListPoster([show], '全国'); return; }
+
+  const canvas = document.getElementById('posterCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W      = 750;
+  const COLS   = Math.min(4, sessions.length);
+  const CELL_W = Math.floor(W / COLS);
+  const CELL_H = 162;
+  const ROWS   = Math.ceil(sessions.length / COLS);
+  const IMG_H  = show.image ? 360 : 0;
+  const GRID_Y = IMG_H + (IMG_H ? 0 : 48);
+  const GRID_H = ROWS * CELL_H;
+  const FOOT_H = 130;
+  const H      = GRID_Y + GRID_H + FOOT_H;
+  const WEEKDAYS = ['周日','周一','周二','周三','周四','周五','周六'];
+
+  canvas.width = W; canvas.height = H;
+
+  const drawGridAndFooter = () => {
+    ctx.fillStyle = '#0f0f11';
+    ctx.fillRect(0, IMG_H, W, H - IMG_H);
+
+    // 无封面图时顶部加标题
+    if (!show.image) {
+      ctx.fillStyle = '#674cff';
+      ctx.fillRect(0, 0, W, 6);
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 32px PingFang SC, Noto Sans SC, sans-serif';
+      ctx.fillText(show.name, W / 2, 44);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '18px PingFang SC, Noto Sans SC, sans-serif';
+      ctx.fillText(show.performer + ' · 全国巡演', W / 2, 72);
+      ctx.textAlign = 'left';
+    }
+
+    sessions.forEach((s, i) => {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      const cx  = col * CELL_W;
+      const cy  = GRID_Y + row * CELL_H;
+
+      if ((row + col) % 2 === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.025)';
+        ctx.fillRect(cx, cy, CELL_W, CELL_H);
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx + 0.5, cy + 0.5, CELL_W - 1, CELL_H - 1);
+
+      const d  = new Date(s.showTime);
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+
+      ctx.fillStyle = '#a294f8';
+      ctx.font = '16px PingFang SC, Noto Sans SC, sans-serif';
+      ctx.fillText(`${mm}/${dd} ${WEEKDAYS[d.getDay()]}`, cx + 16, cy + 30);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 52px PingFang SC, Noto Sans SC, sans-serif';
+      ctx.fillText(clipText(ctx, s.city, CELL_W - 24), cx + 14, cy + 98);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.font = '14px PingFang SC, Noto Sans SC, sans-serif';
+      ctx.fillText(clipText(ctx, s.venue, CELL_W - 24), cx + 14, cy + 126);
+    });
+
+    const FY = GRID_Y + GRID_H + 10;
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(40, FY); ctx.lineTo(W - 40, FY); ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px PingFang SC, Noto Sans SC, sans-serif';
+    ctx.fillText(show.name, W / 2, FY + 40);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '18px PingFang SC, Noto Sans SC, sans-serif';
+    ctx.fillText(show.performer, W / 2, FY + 66);
+    ctx.textAlign = 'left';
+
+    if (qrCanvas) ctx.drawImage(qrCanvas, W - 58, FY + 14, 62, 62);
+
+    downloadCanvas(canvas, show.name + '_全国巡演.png');
+  };
+
+  if (show.image) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.fillStyle = '#0f0f11';
+      ctx.fillRect(0, 0, W, H);
+
+      const ir = img.width / img.height, cr = W / IMG_H;
+      let dw, dh, dx, dy;
+      if (ir > cr) { dh = IMG_H; dw = IMG_H * ir; dx = (W - dw) / 2; dy = 0; }
+      else         { dw = W; dh = W / ir; dx = 0; dy = (IMG_H - dh) / 2; }
+
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, W, IMG_H); ctx.clip();
+      ctx.drawImage(img, dx, dy, dw, dh);
+      ctx.restore();
+
+      const grad = ctx.createLinearGradient(0, IMG_H - 80, 0, IMG_H);
+      grad.addColorStop(0, 'rgba(15,15,17,0)');
+      grad.addColorStop(1, 'rgba(15,15,17,1)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, IMG_H - 80, W, 80);
+
+      drawGridAndFooter();
+    };
+    img.onerror = () => {
+      ctx.fillStyle = '#0f0f11';
+      ctx.fillRect(0, 0, W, H);
+      drawGridAndFooter();
+    };
+    img.src = show.image;
+  } else {
+    ctx.fillStyle = '#0f0f11';
+    ctx.fillRect(0, 0, W, H);
+    drawGridAndFooter();
+  }
 }
 
 // ── 多演出列表海报 ──────────────────────────
