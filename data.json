@@ -427,105 +427,6 @@
     "id": 5
   },
   {
-    "name": "《但丁照镜子》",
-    "performer": "于渤",
-    "image": "images/dandingzhaojingzi.jpg",
-    "sessions": [
-      {
-        "city": "杭州",
-        "venue": "四个二喜剧脱口秀(滨江银泰店)",
-        "showTime": "2026-03-13 19:30",
-        "ticketSaleTime": "",
-        "price": "¥158-298",
-        "ticketLink": "",
-        "link_damai": "",
-        "link_maoyan": "",
-        "link_other": "",
-        "source": "official",
-        "id": "s6_1"
-      },
-      {
-        "city": "合肥",
-        "venue": "哈啦子喜剧之心城剧场",
-        "showTime": "2026-03-14 19:30",
-        "ticketSaleTime": "",
-        "price": "¥108-128",
-        "ticketLink": "",
-        "link_damai": "",
-        "link_maoyan": "",
-        "link_other": "",
-        "source": "official",
-        "id": "s6_2"
-      },
-      {
-        "city": "大庆",
-        "venue": "大庆歌剧院",
-        "showTime": "2026-03-20 19:00",
-        "ticketSaleTime": "",
-        "price": "¥120-199",
-        "ticketLink": "",
-        "link_damai": "",
-        "link_maoyan": "",
-        "link_other": "",
-        "source": "official",
-        "id": "s6_3"
-      },
-      {
-        "city": "哈尔滨",
-        "venue": "蒜伴儿脱口秀俱乐部",
-        "showTime": "2026-03-21 19:00",
-        "ticketSaleTime": "",
-        "price": "¥129-199",
-        "ticketLink": "",
-        "link_damai": "",
-        "link_maoyan": "",
-        "link_other": "",
-        "source": "official",
-        "id": "s6_4"
-      },
-      {
-        "city": "上海",
-        "venue": "尽情空间·无限极荟店",
-        "showTime": "2026-03-27 19:30",
-        "ticketSaleTime": "",
-        "price": "¥150-288",
-        "ticketLink": "",
-        "link_damai": "",
-        "link_maoyan": "",
-        "link_other": "",
-        "source": "official",
-        "id": "s6_5"
-      },
-      {
-        "city": "石家庄",
-        "venue": "火柴梗喜剧中心",
-        "showTime": "2026-04-17 19:30",
-        "ticketSaleTime": "",
-        "price": "¥139-240",
-        "ticketLink": "",
-        "link_damai": "",
-        "link_maoyan": "",
-        "link_other": "",
-        "source": "official",
-        "id": "s6_6"
-      },
-      {
-        "city": "珠海",
-        "venue": "有笑喜剧·回声剧场",
-        "showTime": "2026-05-01 20:00",
-        "ticketSaleTime": "",
-        "price": "¥99-220",
-        "ticketLink": "",
-        "link_damai": "",
-        "link_maoyan": "",
-        "link_other": "",
-        "source": "official",
-        "id": "s6_7"
-      }
-    ],
-    "id": 6
-  },
-  {
     "name": "《区区爱而已》",
     "performer": "漆漆",
     "image": "images/ququaieryi.jpg",
@@ -675,6 +576,105 @@
       }
     ],
     "id": 7
+  },
+  {
+    "name": "《但丁照镜子》",
+    "performer": "于渤",
+    "image": "images/dandingzhaojingzi.jpg",
+    "sessions": [
+      {
+        "city": "杭州",
+        "venue": "四个二喜剧脱口秀(滨江银泰店)",
+        "showTime": "2026-03-13 19:30",
+        "ticketSaleTime": "",
+        "price": "¥158-298",
+        "ticketLink": "",
+        "link_damai": "",
+        "link_maoyan": "",
+        "link_other": "",
+        "source": "official",
+        "id": "s6_1"
+      },
+      {
+        "city": "合肥",
+        "venue": "哈啦子喜剧之心城剧场",
+        "showTime": "2026-03-14 19:30",
+        "ticketSaleTime": "",
+        "price": "¥108-128",
+        "ticketLink": "",
+        "link_damai": "",
+        "link_maoyan": "",
+        "link_other": "",
+        "source": "official",
+        "id": "s6_2"
+      },
+      {
+        "city": "大庆",
+        "venue": "大庆歌剧院",
+        "showTime": "2026-03-20 19:00",
+        "ticketSaleTime": "",
+        "price": "¥120-199",
+        "ticketLink": "",
+        "link_damai": "",
+        "link_maoyan": "",
+        "link_other": "",
+        "source": "official",
+        "id": "s6_3"
+      },
+      {
+        "city": "哈尔滨",
+        "venue": "蒜伴儿脱口秀俱乐部",
+        "showTime": "2026-03-21 19:00",
+        "ticketSaleTime": "",
+        "price": "¥129-199",
+        "ticketLink": "",
+        "link_damai": "",
+        "link_maoyan": "",
+        "link_other": "",
+        "source": "official",
+        "id": "s6_4"
+      },
+      {
+        "city": "上海",
+        "venue": "尽情空间·无限极荟店",
+        "showTime": "2026-03-27 19:30",
+        "ticketSaleTime": "",
+        "price": "¥150-288",
+        "ticketLink": "",
+        "link_damai": "",
+        "link_maoyan": "",
+        "link_other": "",
+        "source": "official",
+        "id": "s6_5"
+      },
+      {
+        "city": "石家庄",
+        "venue": "火柴梗喜剧中心",
+        "showTime": "2026-04-17 19:30",
+        "ticketSaleTime": "",
+        "price": "¥139-240",
+        "ticketLink": "",
+        "link_damai": "",
+        "link_maoyan": "",
+        "link_other": "",
+        "source": "official",
+        "id": "s6_6"
+      },
+      {
+        "city": "珠海",
+        "venue": "有笑喜剧·回声剧场",
+        "showTime": "2026-05-01 20:00",
+        "ticketSaleTime": "",
+        "price": "¥99-220",
+        "ticketLink": "",
+        "link_damai": "",
+        "link_maoyan": "",
+        "link_other": "",
+        "source": "official",
+        "id": "s6_7"
+      }
+    ],
+    "id": 6
   },
   {
     "name": "《小刘的奇妙冒险》",
